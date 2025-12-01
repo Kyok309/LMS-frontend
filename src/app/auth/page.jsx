@@ -6,15 +6,42 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { useSession } from "next-auth/react";
 
 export default function AuthPage() {
-  const [newUser, setNewUser] = useState({firstname: "", lastname: "", email: "", phone: null, password: "",});
+  const router = useRouter();
+  const [newUser, setNewUser] = useState({
+    firstname: "", 
+    lastname: "", 
+    email: "", 
+    phone: null, 
+    password: "",
+    role: ""
+  });
   const [loading, setLoading] = useState(false);
 
   const searchParams = useSearchParams();
   const type = searchParams.get("signup") !== null ? "signup" : "login";
   const [mode, setMode] = useState("login");
+  const [showPassword, setShowPassword] = useState(false);
+  const { data: session } = useSession();
+
+  const handleShowPassword = () => {
+    setShowPassword(!showPassword);
+  }
 
   useEffect(() => {
     setMode(type);
@@ -23,7 +50,7 @@ export default function AuthPage() {
   const handleChange = (e) => {
     const { id, value } = e.target;
     setNewUser({
-        ...newUser,
+      ...newUser,
       [id]: id === "phone" ? Number(value) : value,
     });
   };
@@ -31,27 +58,73 @@ export default function AuthPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    
+    const payload = {
+      first_name: newUser.firstname,
+      last_name: newUser.lastname,
+      email: newUser.email,
+      phone: newUser.phone,
+      password: newUser.password,
+      role: newUser.role
+    };
 
-    const url =
-      mode === "signup"
-        ? "http://localhost:8000/api/signup/"
-        : "http://localhost:8000/api/login/";
+    console.log("Payload:", payload);
 
-    try {
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newUser),
-      });
-      const data = await res.json();
+    if (mode === "login") {
+      try{
+        const result = await signIn("credentials", {
+          email: newUser.email,
+          password: newUser.password,
+          redirect: false,
+        })
+        if (result.error) {
+          toast.error("Имэйл эсвэл нууц үг буруу байна.");
+          setLoading(false);
+          return;
+        }
+        if(session.user.roles.includes("Student")){
+          router.push("/");
+        }
+        else if(session.user.roles.includes("Instructor")) {
+          router.push("/instructor/dashboard");
+        }
+      } catch (err) {
+        toast.error("Нэвтрэхэд алдаа гарлаа.");
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+    else if (mode === "signup") {
+      try {
+        const res = await fetch("http://localhost:8000/api/method/lms_app.api.auth.signup/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json"},
+          credentials: "include",
+          body: JSON.stringify(payload),
+        });
+        const response = await res.json();
+    
+        if (!res.ok) {
+          console.log("Error Response:", response);
+          toast.error(response.desc);
+          setLoading(false);
+          return;
+        };
+        
+        console.log("Response:", response);
+        
+        toast.success(response.desc);
 
-      if (!res.ok) throw new Error(data.error || "Алдаа гарсан.");
-      toast.success( data.message);
-      console.log("Response:", data);
-    } catch (err) {
-        toast.error( err.message || "Алдаа гарсан." );
-    } finally {
-      setLoading(false);
+        if (response.responseType === "ok") {
+          setMode("login");
+          router.push("/auth?login");
+        }
+      } catch (err) {
+        toast.error(err.desc || "Алдаа гарсан.");
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -129,9 +202,9 @@ export default function AuthPage() {
               {mode === "signup" && (
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label htmlFor="lastname" className="text-sm font-medium text-gray-700">
+                    <Label htmlFor="lastname" className="text-sm font-medium text-gray-700">
                       Овог
-                    </label>
+                    </Label>
                     <Input
                       placeholder="Овог"
                       name="lastname"
@@ -143,9 +216,9 @@ export default function AuthPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label htmlFor="firstname" className="text-sm font-medium text-gray-700">
+                    <Label htmlFor="firstname" className="text-sm font-medium text-gray-700">
                       Нэр
-                    </label>
+                    </Label>
                     <Input
                       placeholder="Нэр"
                       name="firstname"
@@ -161,14 +234,14 @@ export default function AuthPage() {
               
               {mode === "signup" && (
                 <div className="space-y-2">
-                  <label htmlFor="phone" className="text-sm font-medium text-gray-700">
+                  <Label htmlFor="phone" className="text-sm font-medium text-gray-700">
                     Утасны дугаар
-                  </label>
+                  </Label>
                   <Input
                     placeholder="99119911"
                     name="phone"
                     id="phone"
-                    value={newUser?.phone? newUser.phone : ""}
+                    value={newUser?.phone ? newUser.phone : ""}
                     onChange={handleChange}
                     required
                     className="h-11"
@@ -177,9 +250,9 @@ export default function AuthPage() {
               )}
               
               <div className="space-y-2">
-                <label htmlFor="email" className="text-sm font-medium text-gray-700">
+                <Label htmlFor="email" className="text-sm font-medium text-gray-700">
                   И-мейл хаяг
-                </label>
+                </Label>
                 <Input
                   placeholder="example@email.com"
                   type="email"
@@ -193,32 +266,57 @@ export default function AuthPage() {
               </div>
               
               <div className="space-y-2">
-                <label htmlFor="password" className="text-sm font-medium text-gray-700">
+                <Label htmlFor="password" className="text-sm font-medium text-gray-700">
                   Нууц үг
-                </label>
-                <Input
-                  placeholder="••••••••"
-                  type="password"
-                  name="password"
-                  id="password"
-                  value={newUser.password}
-                  onChange={handleChange}
-                  required
-                  className="h-11"
-                />
+                </Label>
+                <InputGroup className="h-11 overflow-hidden">
+                  <InputGroupInput
+                    placeholder="••••••••"
+                    name="password"
+                    id="password"
+                    value={newUser.password}
+                    onChange={handleChange}
+                    required
+                    className="h-11"
+                    type={showPassword ? "text" : "password"}
+                  />
+                  <InputGroupAddon align="inline-end">
+                    <Button type="button" onClick={handleShowPassword} variant="ghost" className="h-10 w-10 p-0 hover:bg-none">
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </Button>
+                  </InputGroupAddon>
+                </InputGroup>
               </div>
 
               {mode === "login" && (
                 <div className="flex justify-end">
-                  <a href="#" className="text-sm text-purple-600 hover:text-purple-700 hover:underline">
+                  <a href="/auth/forgotPassword" className="text-sm text-purple-600 hover:text-purple-700 hover:underline">
                     Нууц үгээ мартсан уу?
                   </a>
                 </div>
               )}
 
+              {mode === "signup" && (
+                <Select onValueChange={(value) => setNewUser({...newUser, role: value})}>
+                  <SelectTrigger className="w-full h-11">
+                    <SelectValue placeholder="Бүртгүүлэх хэлбэр"/>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="student">Суралцагч</SelectItem>
+                      <SelectItem value="instructor">Багш</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              )}
               <Button 
-                className="w-full h-11 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold" 
+                className="w-full h-11 bg-linear-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold" 
                 disabled={loading}
+                type="submit"
               >
                 {loading
                   ? "Түр хүлээнэ үү..."
