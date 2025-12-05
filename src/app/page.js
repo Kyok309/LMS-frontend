@@ -1,9 +1,11 @@
+"use client";
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Separator } from "@/components/ui/separator"
-import Header from '@/components/header';
+import Header from '@/app/(student)/components/header';
+import { useSession } from 'next-auth/react';
 
 export default function Home() {
   const features = [
@@ -53,6 +55,8 @@ export default function Home() {
     }
   ];
 
+  const { data: session } = useSession();
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -67,7 +71,9 @@ export default function Home() {
             Хаанаас ч, хэзээ ч суралцаарай. Таны амжилтын түлхүүр
           </p>
           <Button size="lg" className="bg-white text-indigo-800 hover:bg-gray-100 font-bold" asChild>
-            <Link href="/auth?signup">Эхлэх</Link>
+            {
+              session?.user ?  <Link href="/courses">Эхлэх</Link> : <Link href="/auth?signup">Эхлэх</Link>
+            }
           </Button>
         </div>
       </section>

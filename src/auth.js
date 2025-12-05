@@ -68,11 +68,11 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 
           if (response?.responseType === "ok" && response?.data?.access_token) {
             return {
-              email: credentials.email,
               accessToken: response.data.access_token,
               refreshToken: response.data.refresh_token,
               expiresIn: response.data.expires_in,
-              roles: response.data.roles
+              roles: response.data.roles,
+              user: response.data.user
             };
           }
 
@@ -92,11 +92,13 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.email = user.email;
         token.accessToken = user.accessToken;
         token.refreshToken = user.refreshToken;
-        token.expiresIn = Date.now() + user.expiresIn * 1000;
+        token.expiresIn = user.expiresIn * 1000;
+        console.log(token.expiresIn);
+        console.log(Date.now());
         token.roles = user.roles;
+        token.user = user.user;
         return token;
       }
       
@@ -108,13 +110,13 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     },
 
     async session({ session, token }) {
-      session.user.email = token.email;
       session.user.accessToken = token.accessToken;
       session.user.refreshToken = token.refreshToken;
       session.user.expiresIn = token.expiresIn;
       session.user.roles = token.roles;
+      session.user.user = token.user;
       return session;
-    },
+    }
   },
 
   pages: {

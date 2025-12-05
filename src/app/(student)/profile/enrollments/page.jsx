@@ -1,12 +1,7 @@
-import Header from '@/components/header';
-
-const Enrollments = () => {
+export default function Enrollments() {
     return (
         <div>
-            <Header/>
             enrollments
         </div>
     );
 }
- 
-export default Enrollments;

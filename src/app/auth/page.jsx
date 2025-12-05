@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import Link from "next/link";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { getSession, signIn } from "next-auth/react";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Label } from "@/components/ui/label";
 import {
@@ -19,7 +19,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { useSession } from "next-auth/react";
 
 export default function AuthPage() {
   const router = useRouter();
@@ -37,7 +36,6 @@ export default function AuthPage() {
   const type = searchParams.get("signup") !== null ? "signup" : "login";
   const [mode, setMode] = useState("login");
   const [showPassword, setShowPassword] = useState(false);
-  const { data: session } = useSession();
 
   const handleShowPassword = () => {
     setShowPassword(!showPassword);
@@ -58,17 +56,6 @@ export default function AuthPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    
-    const payload = {
-      first_name: newUser.firstname,
-      last_name: newUser.lastname,
-      email: newUser.email,
-      phone: newUser.phone,
-      password: newUser.password,
-      role: newUser.role
-    };
-
-    console.log("Payload:", payload);
 
     if (mode === "login") {
       try{
@@ -82,11 +69,14 @@ export default function AuthPage() {
           setLoading(false);
           return;
         }
-        if(session.user.roles.includes("Student")){
-          router.push("/");
-        }
-        else if(session.user.roles.includes("Instructor")) {
-          router.push("/instructor/dashboard");
+        if (result.ok) {
+          const session = await getSession();
+          
+          if (session?.user?.roles?.includes("Instructor")) {
+            router.push("/instructor/dashboard");
+          } else if (session?.user?.roles?.includes("Student")) {
+            router.push("/");
+          }
         }
       } catch (err) {
         toast.error("Нэвтрэхэд алдаа гарлаа.");
@@ -96,6 +86,15 @@ export default function AuthPage() {
       return;
     }
     else if (mode === "signup") {
+      const payload = {
+      first_name: newUser.firstname,
+      last_name: newUser.lastname,
+      email: newUser.email,
+      phone: newUser.phone,
+      password: newUser.password,
+      role: newUser.role
+      };
+      console.log("Payload:", payload);
       try {
         const res = await fetch("http://localhost:8000/api/method/lms_app.api.auth.signup/", {
           method: "POST",
@@ -307,8 +306,8 @@ export default function AuthPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      <SelectItem value="student">Суралцагч</SelectItem>
-                      <SelectItem value="instructor">Багш</SelectItem>
+                      <SelectItem value="Student">Суралцагч</SelectItem>
+                      <SelectItem value="Instructor">Багш</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
