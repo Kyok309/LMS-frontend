@@ -293,7 +293,7 @@ export default function AuthPage() {
 
               {mode === "login" && (
                 <div className="flex justify-end">
-                  <a href="/auth/forgotPassword" className="text-sm text-purple-600 hover:text-purple-700 hover:underline">
+                  <a href="/auth/forgotPassword" className="text-sm text-blue-600 hover:text-blue-700 hover:underline">
                     Нууц үгээ мартсан уу?
                   </a>
                 </div>
@@ -313,7 +313,7 @@ export default function AuthPage() {
                 </Select>
               )}
               <Button 
-                className="w-full h-11 bg-linear-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold" 
+                className="w-full h-11 bg-blue-900 hover:bg-blue-800 text-white font-semibold" 
                 disabled={loading}
                 type="submit"
               >
@@ -338,14 +338,14 @@ export default function AuthPage() {
               {mode === "login" ? (
                 <p className="text-gray-600">
                   Бүртгэлгүй юу?{" "}
-                  <a href="/auth?signup" className="text-purple-600 hover:text-purple-700 font-semibold hover:underline">
+                  <a href="/auth?signup" className="text-blue-600 hover:text-blue-700 font-semibold hover:underline">
                     Бүртгүүлэх
                   </a>
                 </p>
               ) : (
                 <p className="text-gray-600">
                   Бүртгэлтэй юу?{" "}
-                  <a href="/auth?login" className="text-purple-600 hover:text-purple-700 font-semibold hover:underline">
+                  <a href="/auth?login" className="text-blue-600 hover:text-blue-700 font-semibold hover:underline">
                     Нэвтрэх
                   </a>
                 </p>

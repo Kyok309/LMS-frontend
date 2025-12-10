@@ -1,11 +1,11 @@
 "use client";
 import React from 'react';
+import { useSession } from 'next-auth/react';
+import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import Link from 'next/link';
 import { Separator } from "@/components/ui/separator"
 import Header from '@/app/(student)/components/header';
-import { useSession } from 'next-auth/react';
 
 export default function Home() {
   const features = [
@@ -59,10 +59,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
       <Header/>
       {/* Hero Section */}
-      <section className="bg-linear-to-r from-sky-600 to-purple-800 text-white py-20">
+      <section className="bg-blue-950 text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
             Сургалтын Удирдлагын Систем
@@ -70,7 +69,7 @@ export default function Home() {
           <p className="text-xl mb-8">
             Хаанаас ч, хэзээ ч суралцаарай. Таны амжилтын түлхүүр
           </p>
-          <Button size="lg" className="bg-white text-indigo-800 hover:bg-gray-100 font-bold" asChild>
+          <Button size="lg" className="bg-white text-blue-800 hover:bg-gray-100 font-bold" asChild>
             {
               session?.user ?  <Link href="/courses">Эхлэх</Link> : <Link href="/auth?signup">Эхлэх</Link>
             }
@@ -81,7 +80,7 @@ export default function Home() {
       {/* Features Section */}
       <section className="py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12 text-indigo-800">
+          <h2 className="text-3xl font-bold text-center mb-12 text-blue-800">
             Яагаад биднийг сонгох вэ?
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -89,7 +88,7 @@ export default function Home() {
               <Card key={index} className="text-center hover:shadow-lg transition-shadow">
                 <CardHeader>
                   <div className="text-5xl mb-4">{feature.icon}</div>
-                  <CardTitle className="text-indigo-800">{feature.title}</CardTitle>
+                  <CardTitle className="text-blue-800">{feature.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <CardDescription>{feature.description}</CardDescription>
@@ -103,7 +102,7 @@ export default function Home() {
       {/* Courses Section */}
       <section className="py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12 text-indigo-800">
+          <h2 className="text-3xl font-bold text-center mb-12 text-blue-800">
             Алдартай хичээлүүд
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

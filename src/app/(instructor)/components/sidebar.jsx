@@ -8,6 +8,8 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 const Sidebar = () => {
     const pathname = usePathname();
+    const BASE_URL = "http://localhost:8000";
+
 
     const { data: session } = useSession();
 
@@ -22,9 +24,9 @@ const Sidebar = () => {
                 <div className="flex flex-col items-center justify-center gap-2 mb-4">
                     <div className="w-12 h-12 flex items-center justify-center rounded-full bg-white">
 
-                        {session?.user?.image ? 
+                        {session?.user?.user?.user_image ? 
                             <Avatar className="w-full h-full">
-                                <AvatarImage src={session.user.image} alt="profile"/>
+                                <AvatarImage src={BASE_URL+session.user.user.user_image} alt="profile"/>
                                 <AvatarFallback>CN</AvatarFallback>
                             </Avatar>
                             :

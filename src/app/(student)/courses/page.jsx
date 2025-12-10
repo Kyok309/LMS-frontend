@@ -1,16 +1,8 @@
 "use client";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
-import { Label } from '@/components/ui/label';
-import { Slider } from '@/components/ui/slider';
-import { Checkbox } from '@/components/ui/checkbox';
-import { ChartNoAxesColumnIncreasing, Files, Search, Users } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useEffect, useRef, useState } from "react";
 import Link from 'next/link';
-import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
     Pagination,
@@ -21,14 +13,25 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from "@/components/ui/pagination";
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Slider } from '@/components/ui/slider';
+import { Input } from '@/components/ui/input';
+import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { toast } from "sonner";
+import { ChartNoAxesColumnIncreasing, Files, Search, Users } from 'lucide-react';
 
 export default function Courses() {
     const [courses, setCourses] = useState([]);
     const [categories, setCategories] = useState([]);
-    const [wageRange, setWageRange] = useState([0, 1000000]);
+    const [wageRange, setWageRange] = useState([0, 100000]);
     const [selectedCategories, setSelectedCategories] = useState([]);
-    const [searchQuery, setSearchQuery] = useState("");
     const [sortBy, setSortBy] = useState("creation_desc");
+    const [level, setLevel] = useState("");
+    const [searchQuery, setSearchQuery] = useState("");
+    const searchRef = useRef(null);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
@@ -63,7 +66,8 @@ export default function Courses() {
             params.append("sort_by", sortBy);
             params.append("min_price", wageRange[0]);
             params.append("max_price", wageRange[1]);
-            
+            params.append("level", level);
+
             if (selectedCategories.length > 0) {
                 params.append("categories", selectedCategories.join(","));
             }
@@ -79,12 +83,13 @@ export default function Courses() {
                     "Accept": "application/json"
                 },
             });
-            
+
             const response = await res.json();
             setCourses(response.data.courses || []);
             setTotalPages(response.data.total_pages || 1);
             setTotalItems(response.data.total_count || 0);
             setPage(pageNum);
+            
         } catch (error) {
             toast.error("Сургалт авахад алдаа гарлаа.");
             console.error("Error fetching courses:", error);
@@ -96,7 +101,7 @@ export default function Courses() {
     useEffect(() => {
         setPage(1);
         fetchCourses(1);
-    }, [wageRange[0], wageRange[1], selectedCategories.join(","), sortBy, searchQuery]);
+    }, [wageRange[0], wageRange[1], selectedCategories.join(","), sortBy, level]);
 
     const handleCategoryChange = (categoryName) => {
         setSelectedCategories((prev) => {
@@ -107,6 +112,22 @@ export default function Courses() {
             }
         });
     };
+    useEffect(() => {
+        const inputEl = searchRef.current;
+        if (!inputEl) return;
+
+        function handleKeyDown(event) {
+            if (event.key === "Enter") {
+                fetchCourses();
+            }
+        }
+
+        inputEl.addEventListener("keydown", handleKeyDown);
+
+        return () => {
+            inputEl.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [fetchCourses]);
 
     const generatePaginationItems = () => {
         const items = [];
@@ -204,7 +225,7 @@ export default function Courses() {
                                 value={wageRange}
                                 onValueChange={setWageRange}
                                 min={0}
-                                max={1000000}
+                                max={100000}
                                 step={10000}>
                             </Slider>
                             <div className="flex justify-between mt-2 text-sm text-gray-500">
@@ -219,8 +240,8 @@ export default function Courses() {
                                 {categories?.map((category) => {
                                     const isSelected = selectedCategories.includes(category.name);
                                     return (
-                                        <Label 
-                                            key={category.name} 
+                                        <Label
+                                            key={category.name}
                                             className="hover:bg-accent/50 flex items-start gap-3 rounded-lg border p-3 has-aria-checked:border-blue-600 has-aria-checked:bg-blue-50 dark:has-aria-checked:border-blue-900 dark:has-aria-checked:bg-blue-950 cursor-pointer"
                                         >
                                             <Checkbox
@@ -242,17 +263,32 @@ export default function Courses() {
                 </Card>
                 <div className="w-full flex flex-col gap-8">
                     <div className="flex gap-4">
-                        <div className="flex w-full">
+                        <div className="flex gap-2 w-full">
                             <div className="relative w-full">
                                 <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                                 <Input
-                                    className="pl-10 pr-4 py-2" 
+                                    ref={searchRef}
+                                    className="pl-10 pr-4 py-2"
                                     placeholder="Сургалт эсвэл багшийн нэрээр хайх..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                 />
                             </div>
+                            <Button className="bg-blue-950" onClick={fetchCourses}><Search /></Button>
                         </div>
+                        <Select value={level} onValueChange={setLevel}>
+                            <SelectTrigger className="w-[250px] h-11">
+                                <SelectValue placeholder="Түвшин" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectItem value="All">Бүгд</SelectItem>
+                                    <SelectItem value="Beginner">Анхлан суралцагч</SelectItem>
+                                    <SelectItem value="Intermediate">Дунд шат</SelectItem>
+                                    <SelectItem value="Advanced">Ахисан шат</SelectItem>
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
                         <Select value={sortBy} onValueChange={setSortBy}>
                             <SelectTrigger className="w-[250px] h-11">
                                 <SelectValue placeholder="Эрэмбэ" />
@@ -288,24 +324,24 @@ export default function Courses() {
                                                         <CardDescription className="truncate">{course.description}</CardDescription>
                                                     </CardHeader>
                                                     <CardContent className="flex flex-col items-end gap-3">
-                                                        <div className="w-full flex flex-wrap gap-2 text-sm">
+                                                        <div className="w-full flex flex-wrap gap-2 text-[13px]">
                                                             <div className="flex items-center gap-2">
-                                                                <ChartNoAxesColumnIncreasing size={18}/>
+                                                                <ChartNoAxesColumnIncreasing size={14} />
                                                                 {course.level}
                                                             </div>
                                                             <div className="flex items-center gap-2">
-                                                                <Users size={18}/>
+                                                                <Users size={14} />
                                                                 <p>{course.student_count} суралцагч</p>
                                                             </div>
                                                             <div className="flex items-center gap-2">
-                                                                <Files size={18}/>
+                                                                <Files size={14} />
                                                                 <p>{course.lesson_count} хичээл</p>
                                                             </div>
                                                         </div>
-                                                        <Separator/>
+                                                        <Separator />
                                                         <div className="w-full flex flex-wrap justify-between gap-2">
                                                             {
-                                                                course.instructor_full_name && 
+                                                                course.instructor_full_name &&
                                                                 <div className="flex items-center gap-2">
                                                                     <Avatar>
                                                                         <AvatarImage src={`${BASE_URL}${course.instructor_image}`} alt="profile" />
@@ -331,7 +367,7 @@ export default function Courses() {
                                     })
                                 ) : (
                                     <div className="col-span-full text-center py-12">
-                                        <p className="text-gray-500">Хичээл олдсонгүй</p>
+                                        <p className="text-gray-500">Сургалт олдсонгүй</p>
                                     </div>
                                 )}
                             </div>
