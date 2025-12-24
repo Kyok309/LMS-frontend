@@ -27,6 +27,7 @@ import Link from "next/link";
 import AddCourse from "../../components/addCourse";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { formatMoney } from "@/lib/utils";
 
 export default function InstructorCourses() {
     const [courses, setCourses] = useState([]);
@@ -41,6 +42,7 @@ export default function InstructorCourses() {
     const [totalPages, setTotalPages] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
     const searchRef = useRef(null);
+    const [status, setStatus] = useState("");
 
     const fetchCourses = async (pageNum = 1) => {
         setIsLoading(true);
@@ -50,13 +52,10 @@ export default function InstructorCourses() {
             params.append("page", pageNum);
             params.append("sort_by", sortBy);
             params.append("level", level);
-
-            if (searchQuery) {
-                params.append("search", searchQuery)
-            }
-            if (selectedCategory) {
-                params.append("category", selectedCategory);
-            }
+            params.append("status", status);
+            params.append("category", selectedCategory)
+            params.append("search", searchQuery)
+            
             const res = await fetch(`http://localhost:8000/api/method/lms_app.api.course.get_courses_instructor?${params.toString()}`, {
                 method: "GET",
                 headers: {
@@ -82,7 +81,7 @@ export default function InstructorCourses() {
     useEffect(() => {
         setPage(1);
         fetchCourses(1);
-    }, [sortBy, level, selectedCategory])
+    }, [sortBy, level, selectedCategory, status])
 
     useEffect(() => {
         const inputEl = searchRef.current;
@@ -213,9 +212,9 @@ export default function InstructorCourses() {
         <div className="w-full flex flex-col gap-4">
             <div className="w-full flex flex-wrap justify-between items-center">
                 <h2 className="text-2xl text-gray-700 font-bold">Сургалтын жагсаалт</h2>
-                <AddCourse categories={categories} />
+                <AddCourse categories={categories} fetchCourses={fetchCourses}/>
             </div>
-            <div className="flex flex-wrap md:flex-nowrap justify-between gap-4">
+            <div className="flex flex-wrap xl:flex-nowrap justify-between gap-4">
                 <div className="flex flex-1 gap-2">
                     <InputGroup>
                         <InputGroupInput
@@ -231,6 +230,18 @@ export default function InstructorCourses() {
                     <Button onClick={fetchCourses} variant="outline" className="border-blue-950 text-blue-950"><Search /> Хайх</Button>
                 </div>
                 <div className="flex gap-2">
+                    <Select value={status} onValueChange={setStatus}>
+                        <SelectTrigger className="w-full h-11">
+                            <SelectValue placeholder="Төлөв" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectGroup>
+                                <SelectItem value="All">Бүгд</SelectItem>
+                                <SelectItem value="Published">Нийтэлсэн</SelectItem>
+                                <SelectItem value="Draft">Хадгалсан</SelectItem>
+                            </SelectGroup>
+                        </SelectContent>
+                    </Select>
                     <Select value={level} onValueChange={setLevel}>
                         <SelectTrigger className="w-full h-11">
                             <SelectValue placeholder="Түвшин сонгох" />
@@ -291,7 +302,7 @@ export default function InstructorCourses() {
                                     return (
                                         <Link key={index} href={`/instructor/courses/${course.name}`}>
                                             <Card className="pt-0 overflow-hidden hover:shadow-lg transition-shadow">
-                                                <div className="h-48 flex text-white text-6xl bg-gray-300 bg-cover bg-center" style={course.thumbnail ? { backgroundImage: `url(${BASE_URL}${course.thumbnail})` } : {}}>
+                                                <div className="h-48 flex text-white text-6xl bg-gray-300 bg-cover bg-center" style={course.thumbnail ? { backgroundImage: `url(${BASE_URL}${course.thumbnail.replace(/ /g, "%20")})` } : {}}>
                                                     <Badge className="bg-blue-950 mx-3 mt-3 h-8 rounded-md">{course.category_name}</Badge>
                                                 </div>
                                                 <CardHeader>
@@ -316,11 +327,15 @@ export default function InstructorCourses() {
                                                     <Separator />
                                                     <div className="w-full flex justify-between ">
                                                         {course.price_type === "Free" ?
-                                                            <Badge className="bg-green-500 h-8 text-sm">Үнэгүй</Badge>
+                                                            <div>Үнэгүй</div>
                                                             :
-                                                            <Badge className="bg-green-500 h-8 text-sm">{Number(course.price).toLocaleString("en-US").replace(/,/g, ".")}₮</Badge>
+                                                            <div>{formatMoney(course.price)}₮</div>
                                                         }
-                                                        <Button variant="ghost" className="">Дэлгэрэнгүй</Button>
+                                                        {
+                                                            course.status === "Published" ?
+                                                            <Badge className="p-2 bg-green-100 text-green-700 rounded-md">Нийтэлсэн</Badge> :
+                                                            <Badge className="p-2 bg-gray-200 text-gray-800 rounded-md">Хадгалсан</Badge>
+                                                        }
                                                     </div>
                                                 </CardContent>
                                             </Card>

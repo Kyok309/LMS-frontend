@@ -1,6 +1,6 @@
 "use client";
 import { cn } from "@/lib/utils";
-import { BanknoteArrowUp, ChartColumnBigIcon, GraduationCap, LayoutDashboardIcon, LogOutIcon, UserPen } from "lucide-react";
+import { BanknoteArrowUp, ChartColumnBigIcon, CornerUpLeft, GraduationCap, LayoutDashboardIcon, LogOutIcon, Settings, UserPen } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
@@ -8,8 +8,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 const Sidebar = () => {
     const pathname = usePathname();
-    const BASE_URL = "http://localhost:8000";
-
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     const { data: session } = useSession();
 
@@ -22,8 +21,11 @@ const Sidebar = () => {
         <div className="lg:min-w-[350px] lg:w-[350px] lg:shrink-0 md:min-w-1/4 md:w-1/4 w-1/2 max-h-screen flex flex-col justify-between py-8 bg-[#0e1b3d] text-white">
             <div className="flex flex-col gap-4">
                 <div className="flex flex-col items-center justify-center gap-2 mb-4">
+                    <div className="w-full flex px-4 gap-2 items-center mb-4">
+                        <CornerUpLeft size={18}/>
+                        <Link href="/">Буцах</Link>
+                    </div>
                     <div className="w-12 h-12 flex items-center justify-center rounded-full bg-white">
-
                         {session?.user?.user?.user_image ? 
                             <Avatar className="w-full h-full">
                                 <AvatarImage src={BASE_URL+session.user.user.user_image} alt="profile"/>
@@ -89,6 +91,15 @@ const Sidebar = () => {
                     )}>
                         <ChartColumnBigIcon/>
                         Тайлан
+                    </div>
+                </Link>
+                <Link href="/instructor/settings">
+                    <div className={cn(
+                        "mx-2 py-3 px-4 flex items-center gap-2 rounded-md hover:bg-[#1b315a]",
+                        pathname === "/instructor/settings" && "bg-[#093073]"
+                    )}>
+                        <Settings/>
+                        Тохиргоо
                     </div>
                 </Link>
             </div>

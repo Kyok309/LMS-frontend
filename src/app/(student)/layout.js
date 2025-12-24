@@ -1,4 +1,4 @@
-import Header from "@/app/(student)/components/header";
+import Header from "@/components/header";
 
 export default function StudentLayout({ children }) {
   return (

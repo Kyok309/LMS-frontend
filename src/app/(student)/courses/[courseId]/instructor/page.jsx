@@ -1,17 +1,13 @@
 "use client";
-import { getSession } from "next-auth/react";
-import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
-
-export default function Lessons() {
-    const [ lessons, setLessons ] = useState([]);
+export default function CourseInstructor() {
+    const [ instructor, setInstructor ] = useState(null);
     const { courseId } = useParams();
 
     useEffect(() => {
-        const fetchLessons = async () => {
+        const fetchInstructor = async () => {
             try {
                 const session = await getSession();
-                const res = await fetch(`http://localhost:8000/api/method/lms_app.api.lesson.get_lessons?courseId=${courseId}`, {
+                const res = await fetch(`http://localhost:8000/api/method/lms_app.api.course.get_course_instructor?courseId=${courseId}`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
@@ -20,15 +16,17 @@ export default function Lessons() {
                     },
                 });
                 const response = await res.json();
-                setLessons(response.data);
+                setInstructor(response.data);
             } catch (error) {
-                console.error("Error fetching lessons:", error);
+                console.error("Error fetching instructor:", error);
             }
         };
 
-        fetchLessons();
+        fetchInstructor();
     }, [])
     return (
-        <div>Lessons Page</div>
+        <div>
+            Instructor Page
+        </div>
     );
 }

@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import Link from "next/link";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { getSession, signIn } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Label } from "@/components/ui/label";
 import {
@@ -70,13 +70,7 @@ export default function AuthPage() {
           return;
         }
         if (result.ok) {
-          const session = await getSession();
-          
-          if (session?.user?.roles?.includes("Instructor")) {
-            router.push("/instructor/dashboard");
-          } else if (session?.user?.roles?.includes("Student")) {
-            router.push("/");
-          }
+          router.push("/");
         }
       } catch (err) {
         toast.error("Нэвтрэхэд алдаа гарлаа.");
@@ -129,9 +123,7 @@ export default function AuthPage() {
 
   return (
     <div className="flex min-h-screen">
-      {/* Left Side - Branding */}
       <div className="hidden lg:flex lg:w-1/2 bg-black/40 bg- bg-[url(/login_background.jpg)] bg-cover bg-blend-overlay p-12 flex-col justify-between relative overflow-hidden">
-        {/* Decorative circles */}
         <div className="absolute top-20 right-20 w-72 h-72 bg-white/10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-20 left-20 w-96 h-96 bg-purple-400/20 rounded-full blur-3xl"></div>
         
@@ -168,10 +160,8 @@ export default function AuthPage() {
         </div>
       </div>
 
-      {/* Right Side - Form */}
       <div className="flex-1 flex items-center justify-center p-8 bg-gray-50">
         <div className="w-full max-w-md">
-          {/* Logo for mobile */}
           <div className="lg:hidden text-center mb-8">
             <div className="text-purple-600 text-3xl font-bold mb-2 flex items-center justify-center gap-2">
               <span className="text-4xl">📚</span>
@@ -180,7 +170,6 @@ export default function AuthPage() {
             <p className="text-gray-600">Сургалтын Удирдлагын Систем</p>
           </div>
 
-          {/* Form Card */}
           <div className="bg-white rounded-2xl shadow-xl p-8 space-y-6">
             <Link href="/" className="w-fit mb-6 flex items-center gap-2">
               <ArrowLeft size={18}/>
@@ -353,7 +342,6 @@ export default function AuthPage() {
             </div>
           </div>
 
-          {/* Footer */}
           <p className="text-center text-sm text-gray-500 mt-8">
             © 2025 LMS. Бүх эрх хуулиар хамгаалагдсан.
           </p>

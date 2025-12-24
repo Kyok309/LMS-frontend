@@ -22,6 +22,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { toast } from "sonner";
 import { ChartNoAxesColumnIncreasing, Files, Search, Users } from 'lucide-react';
+import { formatMoney } from "@/lib/utils";
 
 export default function Courses() {
     const [courses, setCourses] = useState([]);
@@ -357,7 +358,7 @@ export default function Courses() {
                                                             {course.price_type === "Free" ?
                                                                 <Badge className="bg-green-500 h-8 text-sm">Үнэгүй</Badge>
                                                                 :
-                                                                <Badge className="bg-green-500 h-8 text-sm">{Number(course.price).toLocaleString("en-US").replace(/,/g, ".")}₮</Badge>
+                                                                <Badge className="bg-green-500 h-8 text-sm">{formatMoney(course.price)}₮</Badge>
                                                             }
                                                         </div>
                                                     </CardContent>

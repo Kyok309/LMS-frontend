@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from "@/components/ui/separator"
-import Header from '@/app/(student)/components/header';
+import Header from '@/components/header';
 
 export default function Home() {
   const features = [
