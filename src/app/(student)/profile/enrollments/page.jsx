@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { getSession } from 'next-auth/react';
 import Link from 'next/link';
 import { formatDate } from '@/lib/utils';
+import Loading from '@/components/loading';
 
 export default function EnrollmentsPage() {
     const [enrollments, setEnrollments] = useState([]);
@@ -29,6 +30,7 @@ export default function EnrollmentsPage() {
                     }
                 );
                 const response = await res.json();
+                console.log(response)
                 setEnrollments(response.data || []);
                 setError(null);
             } catch (err) {
@@ -70,12 +72,7 @@ export default function EnrollmentsPage() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-screen">
-                <div className="flex flex-col items-center gap-3">
-                    <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-                    <p className="text-gray-600">Уншиж байна...</p>
-                </div>
-            </div>
+            <Loading/>
         );
     }
 
@@ -110,9 +107,9 @@ export default function EnrollmentsPage() {
                     {enrollments.map((enrollment, index) => (
                         <Link href={`/courses/${enrollment.course}`} key={index}>
                             <Card
-                                className="h-[250px] flex flex-col justify-between hover:shadow-lg transition-shadow duration-300"
+                                className="h-64 flex flex-col justify-between hover:shadow-lg transition-shadow duration-300"
                             >
-                                <CardHeader className="pb-3">
+                                <CardHeader>
                                     <div className="flex items-start justify-between gap-2">
                                         <div className="flex-1">
                                             <CardTitle className="text-lg line-clamp-2">
@@ -128,12 +125,15 @@ export default function EnrollmentsPage() {
                                         {enrollment.course_description}
                                     </CardDescription>
                                 </CardHeader>
-
                                 <CardContent className="space-y-4">
                                     <div className="space-y-2">
                                         <div className="flex items-center gap-2 text-sm text-gray-600">
                                             <Calendar className="w-4 h-4" />
-                                            <span>{formatDate(enrollment.enrolled_on)} элссэн</span>
+                                            <span>Дундаж оноо: {enrollment.average_score.toFixed(2)}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                                            <Calendar className="w-4 h-4" />
+                                            <span>{formatDate(enrollment.creation)}-д элссэн</span>
                                         </div>
                                     </div>
 
@@ -141,7 +141,7 @@ export default function EnrollmentsPage() {
                                         <div className="flex items-center justify-between text-sm">
                                             <span className="text-gray-600">Явц</span>
                                             <span className="font-semibold text-gray-900">
-                                                {enrollment.progress_percentage}%
+                                                {enrollment.progress_percentage.toFixed(1)}%
                                             </span>
                                         </div>
                                         <div className="w-full bg-gray-200 rounded-full h-2">

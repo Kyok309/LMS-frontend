@@ -42,6 +42,7 @@ async function refreshAccessToken(token) {
 }
  
 export const { auth, handlers, signIn, signOut } = NextAuth({
+  trustHost: true,
   providers: [
     Credentials({
       name: "Credentials",
@@ -70,12 +71,11 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
             return {
               accessToken: response.data.access_token,
               refreshToken: response.data.refresh_token,
-              expiresIn: response.data.expires_in,
+              expiresIn: Date.now() + response.data.expires_in * 1000,
               roles: response.data.roles,
               user: response.data.user
             };
           }
-
           return response.desc;
         } catch (error) {
           console.error("Authorize error:", error);
@@ -87,6 +87,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     
   session: {
     strategy: "jwt",
+    maxAge: 24 * 60 * 60
   },
 
   callbacks: {
@@ -94,15 +95,18 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       if (user) {
         token.accessToken = user.accessToken;
         token.refreshToken = user.refreshToken;
-        token.expiresIn = user.expiresIn * 1000;
-        console.log(token.expiresIn);
-        console.log(Date.now());
+        token.expiresIn = user.expiresIn;
         token.roles = user.roles;
         token.user = user.user;
         return token;
       }
       
-      if (Date.now() > token.expiresIn) {
+      const now = Date.now();
+      const timeUntilExpiry = token.expiresIn - now;
+      const bufferTime = 60 * 1000; // 60 seconds
+      
+      if (timeUntilExpiry < bufferTime) {
+        console.log(`Token expiring in ${timeUntilExpiry / 1000}s, refreshing now...`);
         return await refreshAccessToken(token);
       }
 
@@ -110,6 +114,10 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     },
 
     async session({ session, token }) {
+      if (token.error) {
+        throw new Error(token.error);
+      }
+      
       session.user.accessToken = token.accessToken;
       session.user.refreshToken = token.refreshToken;
       session.user.expiresIn = token.expiresIn;

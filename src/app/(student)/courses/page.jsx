@@ -243,7 +243,7 @@ export default function Courses() {
                                     return (
                                         <Label
                                             key={category.name}
-                                            className="hover:bg-accent/50 flex items-start gap-3 rounded-lg border p-3 has-aria-checked:border-blue-600 has-aria-checked:bg-blue-50 dark:has-aria-checked:border-blue-900 dark:has-aria-checked:bg-blue-950 cursor-pointer"
+                                            className="hover:bg-accent/50 flex items-start gap-3 rounded-lg border p-3 has-aria-checked:border-blue-600 has-aria-checked:bg-blue-50 dark:has-aria-checked:border-blue-900 dark:has-aria-checked:bg-blue-900 cursor-pointer"
                                         >
                                             <Checkbox
                                                 checked={isSelected}
@@ -275,7 +275,7 @@ export default function Courses() {
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                 />
                             </div>
-                            <Button className="bg-blue-950" onClick={fetchCourses}><Search /></Button>
+                            <Button className="bg-blue-900" onClick={fetchCourses}><Search /></Button>
                         </div>
                         <Select value={level} onValueChange={setLevel}>
                             <SelectTrigger className="w-[250px] h-11">
@@ -318,7 +318,7 @@ export default function Courses() {
                                             <Link key={index} href={`/courses/${course.name}`}>
                                                 <Card className="pt-0 overflow-hidden hover:shadow-lg transition-shadow h-full">
                                                     <div className="h-48 flex text-white text-6xl bg-gray-300 bg-cover bg-center" style={course.thumbnail ? { backgroundImage: `url(${BASE_URL}${course.thumbnail})` } : {}}>
-                                                        <Badge className="bg-blue-950 mx-3 mt-3 h-8 rounded-md">{course.category_name}</Badge>
+                                                        <Badge className="bg-blue-900 mx-3 mt-3 h-8 rounded-md">{course.category_name}</Badge>
                                                     </div>
                                                     <CardHeader>
                                                         <CardTitle>{course.course_title}</CardTitle>

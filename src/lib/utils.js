@@ -5,14 +5,14 @@ export function cn(...inputs) {
   return twMerge(clsx(inputs));
 }
 export function formatDate(dateStr) {
-  return new Date(dateStr).toLocaleDateString('en-CA', {
+  return new Date(dateStr).toLocaleDateString('ja-JP', {
     year: 'numeric',
     month: 'numeric',
     day: 'numeric',
   });
 }
 export function formatDateTime(dateStr) {
-  return new Date(dateStr).toLocaleString('en-UK', {
+  return new Date(dateStr).toLocaleString('ja-JP', {
     year: 'numeric',
     month: 'numeric',
     day: 'numeric',

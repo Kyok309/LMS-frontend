@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import NotificationBell from './notificationBell';
 
 const Header = () => {
     const { data: session } = useSession();
@@ -12,8 +13,6 @@ const Header = () => {
         await fetch("/api/logout", { method: "POST" });
         await signOut({ redirect: true, callbackUrl: "/" });
     }
-
-
     return (
         <header className="bg-blue-950 text-white shadow-md">
             <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -24,6 +23,7 @@ const Header = () => {
                     <ul className="flex items-center space-x-8">
                         <li><a href="/" className="hover:opacity-80 transition-opacity">Нүүр</a></li>
                         <li><a href="/courses" className="hover:opacity-80 transition-opacity">Сургалтууд</a></li>
+                        <NotificationBell/>
                         {session && session.user ? (
                             <>
                                 {

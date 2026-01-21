@@ -209,7 +209,7 @@ export default function Profile() {
                             </div>
                         </div>
                     </div>
-                    <Button className="bg-blue-950 hover:bg-blue-800" onClick={updateProfile}><Save/>Хадгалах</Button>
+                    <Button className="bg-blue-900 hover:bg-blue-800" onClick={updateProfile}><Save/>Хадгалах</Button>
                 </div>
             ) :
                 <div className="w-full flex justify-center items-center">Профайл мэдээлэл олдсонгүй.</div>

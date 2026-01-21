@@ -21,8 +21,7 @@ const AddCourse = ({ categories, fetchCourses }) => {
         learning_curve: "",
         requirement: "",
         price_type: "",
-        price: 0.0,
-        status: ""
+        price: 0.0
     });
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -106,7 +105,7 @@ const AddCourse = ({ categories, fetchCourses }) => {
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                <Button className="bg-blue-950 text-white hover:bg-blue-800 hover:text-white">
+                <Button className="bg-blue-900 text-white hover:bg-blue-800 hover:text-white">
                     <Plus />
                     Сургалт нэмэх
                 </Button>
@@ -269,30 +268,11 @@ const AddCourse = ({ categories, fetchCourses }) => {
                                 />
                             </div>
                         }
-                        <div className="flex flex-col gap-2">
-                            <Label htmlFor="status" className="text-right">
-                                Төлөв
-                            </Label>
-                            <Select
-                                name="status"
-                                value={course.status}
-                                onValueChange={(value) => handleSelectChange('status', value)}
-                                required
-                            >
-                                <SelectTrigger className="w-full text-right">
-                                    <SelectValue placeholder="Сонгоно уу" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="Draft">Хадгалсан</SelectItem>
-                                    <SelectItem value="Published">Нийтэлсэн</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
                     </div>
                 </div>
                 <DialogFooter className="justify-center">
                     <DialogClose asChild>
-                        <Button onClick={handleSubmit} disabled={isLoading} className="bg-blue-950 hover:bg-blue-800">
+                        <Button onClick={handleSubmit} disabled={isLoading} className="bg-blue-900 hover:bg-blue-800">
                             {isLoading ? 'Хадгалж байна...' : 'Хадгалах'}
                         </Button>
                     </DialogClose>

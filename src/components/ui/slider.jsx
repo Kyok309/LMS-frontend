@@ -40,7 +40,7 @@ function Slider({
         <SliderPrimitive.Range
           data-slot="slider-range"
           className={cn(
-            "bg-blue-950 absolute data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full"
+            "bg-blue-900 absolute data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full"
           )} />
       </SliderPrimitive.Track>
       {Array.from({ length: _values.length }, (_, index) => (

@@ -5,7 +5,7 @@ import { getSession } from "next-auth/react";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import {
     Select,
     SelectContent,
@@ -227,7 +227,7 @@ export default function InstructorCourses() {
                             <Search />
                         </InputGroupAddon>
                     </InputGroup>
-                    <Button onClick={fetchCourses} variant="outline" className="border-blue-950 text-blue-950"><Search /> Хайх</Button>
+                    <Button onClick={fetchCourses} variant="outline" className="border-blue-900 text-blue-900"><Search /> Хайх</Button>
                 </div>
                 <div className="flex gap-2">
                     <Select value={status} onValueChange={setStatus}>
@@ -303,7 +303,7 @@ export default function InstructorCourses() {
                                         <Link key={index} href={`/instructor/courses/${course.name}`}>
                                             <Card className="pt-0 overflow-hidden hover:shadow-lg transition-shadow">
                                                 <div className="h-48 flex text-white text-6xl bg-gray-300 bg-cover bg-center" style={course.thumbnail ? { backgroundImage: `url(${BASE_URL}${course.thumbnail.replace(/ /g, "%20")})` } : {}}>
-                                                    <Badge className="bg-blue-950 mx-3 mt-3 h-8 rounded-md">{course.category_name}</Badge>
+                                                    <Badge className="bg-blue-900 mx-3 mt-3 h-8 rounded-md">{course.category_name}</Badge>
                                                 </div>
                                                 <CardHeader>
                                                     <CardTitle>{course.course_title}</CardTitle>

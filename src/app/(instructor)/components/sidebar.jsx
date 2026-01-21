@@ -18,7 +18,7 @@ const Sidebar = () => {
     }
 
     return (
-        <div className="lg:min-w-[350px] lg:w-[350px] lg:shrink-0 md:min-w-1/4 md:w-1/4 w-1/2 max-h-screen flex flex-col justify-between py-8 bg-[#0e1b3d] text-white">
+        <div className="bg-[#0e1b3d] lg:min-w-[350px] lg:w-[350px] lg:shrink-0 md:min-w-1/4 md:w-1/4 w-1/2 max-h-screen flex flex-col justify-between py-8  text-white">
             <div className="flex flex-col gap-4">
                 <div className="flex flex-col items-center justify-center gap-2 mb-4">
                     <div className="w-full flex px-4 gap-2 items-center mb-4">

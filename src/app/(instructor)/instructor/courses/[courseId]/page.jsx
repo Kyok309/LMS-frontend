@@ -2,7 +2,6 @@
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { getSession } from "next-auth/react";
@@ -21,7 +20,9 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { ChevronRight, Trash } from "lucide-react";
+import { ChevronRight, Save, Trash } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import Loading from "@/components/loading";
 
 
 export default function CourseDetail() {
@@ -30,6 +31,7 @@ export default function CourseDetail() {
     const pathname = usePathname();
     const BASE_URL = "http://localhost:8000";
     const router = useRouter();
+    const [isLoading, setIsLoading] = useState(false);
     const [course, setCourse] = useState({
         course_title: "",
         category: "",
@@ -45,8 +47,10 @@ export default function CourseDetail() {
     });
 
     const fetchCategories = async () => {
-        const session = await getSession();
+        
         try {
+            setIsLoading(true)
+            const session = await getSession();
             const res = await fetch('http://localhost:8000/api/method/lms_app.api.category.get_categories/', {
                 method: "GET",
                 headers: {
@@ -61,11 +65,14 @@ export default function CourseDetail() {
         } catch (error) {
             toast.error("Алдаа гарлаа.")
             console.error("Error fetching categories:", error);
+        } finally {
+            setIsLoading(false);
         }
     }
 
     const fetchCourse = async () => {
         try {
+            setIsLoading(true);
             const session = await getSession();
             const res = await fetch(`http://localhost:8000/api/method/lms_app.api.course.get_course_instructor?id=${params.courseId}`, {
                 method: "GET",
@@ -81,6 +88,8 @@ export default function CourseDetail() {
         } catch (error) {
             toast.error("Алдаа гарлаа.")
             console.error("Error fetching courses:", error);
+        } finally {
+            setIsLoading(false);
         }
     }
     useEffect(() => {
@@ -112,6 +121,9 @@ export default function CourseDetail() {
 
         const form = new FormData();
         form.append("file", file);
+        form.append("doctype", "Course")
+        form.append("docname", params.courseId)
+        form.append("fieldname", "thumbnail")
         const session = await getSession();
 
         const upload = await fetch("http://localhost:8000/api/method/upload_file", {
@@ -187,6 +199,10 @@ export default function CourseDetail() {
             console.log(error)
             toast.error(error.message)
         }
+    }
+
+    if (isLoading) {
+        return <Loading/>
     }
     return (
         <div className="w-full flex flex-col gap-6">
@@ -433,26 +449,32 @@ export default function CourseDetail() {
                         <Label htmlFor="status">Нийтлэх</Label>
                     </div>
                     <div className="flex gap-4 mt-4">
-                        <Button onClick={updateCourse} className="w-fit bg-blue-950 hover:bg-blue-800">Хадгалах</Button>
-                        <Dialog>
-                            <DialogTrigger asChild>
-                                <Button variant="destructive">Устгах</Button>
-                            </DialogTrigger>
-                            <DialogContent className="sm:max-w-[425px]">
-                                <DialogHeader>
-                                    <DialogTitle>Та устгахдаа итгэлтэй байна уу?</DialogTitle>
-                                    <DialogDescription>
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button variant="destructive"><Trash/> Устгах</Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent className="sm:max-w-[425px]">
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Та устгахдаа итгэлтэй байна уу?</AlertDialogTitle>
+                                    <AlertDialogDescription>
                                         Устгагдсан сургалтыг дахин сэргээх боломжгүйг анхаарна уу.
-                                    </DialogDescription>
-                                </DialogHeader>
-                                <DialogFooter>
-                                    <DialogClose asChild>
-                                        <Button variant="outline">Цуцлах</Button>
-                                    </DialogClose>
-                                    <Button variant="destructive" onClick={deleteCourse}>Устгах</Button>
-                                </DialogFooter>
-                            </DialogContent>
-                        </Dialog>
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>
+                                        Цуцлах
+                                    </AlertDialogCancel>
+                                    <AlertDialogAction onClick={deleteCourse}>
+                                        Устгах
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                        <Button
+                            onClick={updateCourse}
+                            className="w-fit bg-blue-900 hover:bg-blue-800">
+                                <Save/> Хадгалах
+                        </Button>
                     </div>
                 </div>
             </div>
