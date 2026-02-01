@@ -5,6 +5,7 @@ const AUTH_ROUTES = ["/auth"];
 const STUDENT_ROUTES = ["/profile", "/profile/enrollments"];
 const INSTRUCTOR_ROUTES = ["/instructor"];
 const ENROLLED_ROUTES = ["/courses/[courseId]/lessons"];
+const CERTIFICATE_ROUTE = ["/courses/[courseId]/certificate"];
 
 function isAuthRoute(pathname) {
   return AUTH_ROUTES.includes(pathname);
@@ -20,6 +21,14 @@ function isInstructorRoute(pathname) {
 
 function isEnrolledRoute(pathname) {
   return ENROLLED_ROUTES.some((route) => {
+    const pattern = route.replace(/\[(\w+)\]/g, "[^/]+");
+    const regex = new RegExp(`^${pattern}(/|$)`);
+    return regex.test(pathname);
+  });
+}
+
+function isCertificateRoute(pathname) {
+  return CERTIFICATE_ROUTE.some((route) => {
     const pattern = route.replace(/\[(\w+)\]/g, "[^/]+");
     const regex = new RegExp(`^${pattern}(/|$)`);
     return regex.test(pathname);
@@ -47,6 +56,12 @@ export async function proxy(request) {
   }
 
   if (isInstructorRoute(pathname) && !isInstructor) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/";
+    return NextResponse.redirect(url);
+  }
+
+  if (isCertificateRoute(pathname) && !authed) {
     const url = request.nextUrl.clone();
     url.pathname = "/";
     return NextResponse.redirect(url);

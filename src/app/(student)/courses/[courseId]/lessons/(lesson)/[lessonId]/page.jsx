@@ -69,6 +69,7 @@ export default function Lesson() {
                     }),
                 }
             )
+            console.log(res)
     
             const blob = await res.blob()
             const url = URL.createObjectURL(blob)
@@ -142,7 +143,7 @@ export default function Lesson() {
     }
 
     return (
-        <div className="w-full h-full flex flex-col gap-4">
+        <div className="w-full h-full border border-slate-50 p-8 shadow rounded-2xl flex flex-col gap-4">
             <Breadcrumb className="w-full flex">
                 <BreadcrumbList>
                     <BreadcrumbItem>
@@ -184,12 +185,11 @@ export default function Lesson() {
                             loadContentFile(item.name, item.video_url)
                         }
                         return (
-                            <div key={item.name} className="w-full rounded-2xl overflow-clip">
+                            <div key={item.name} className="w-full rounded-2xl overflow-hidden">
                                 <video
-                                    
                                     controls
                                     src={fileUrls[item.name]}
-                                    className="w-full max-h-[500px]"
+                                    className="w-full max-h-[500px] border rounded-2xl"
                                 />
                             </div>
                         )
@@ -204,35 +204,14 @@ export default function Lesson() {
                     }
 
                     if (item.content_type === "File") {
-                        
-                        const extractFileName = (url) => {
-                            if (!url) return "File"
-                            
-                            let filename = url.split('/').pop()
-                            
-                            filename = filename.split('?')[0]
-                            // Decode URI in case it's encoded
-                            filename = decodeURIComponent(filename)
-                            return filename || "File"
+
+                        if (!fileUrls[item.name]) {
+                            loadContentFile(item.name, item.attachment)
                         }
 
-                        const fileName = extractFileName(item.attachment)
-
                         return (
-                            <div key={item.name} className="flex flex-wrap items-center gap-8">
-                                <div>Хичээлд хэрэгтэй файл: </div>
-                                <Button
-                                    onClick={() =>
-                                        downloadFile(item.name, item.attachment, fileName)
-                                    }
-                                    disabled={downloadingFiles[item.name]}
-                                    variant="outline"
-                                    size="large"
-                                    className="flex items-center gap-2 px-4 py-2 cursor-pointer disabled:opacity-50"
-                                >
-                                    <Download size={18} />
-                                    {downloadingFiles[item.name] ? "Татаж байна..." : `Татах ${fileName}`}
-                                </Button>
+                            <div key={item.name} className="rounded-2xl shadow overflow-hidden flex flex-wrap items-center gap-8">
+                                <iframe src={`${fileUrls[item.name]}#navpanes=0&scrollbar=0`} width="100%" height="860px"/>
                             </div>
                         )
                     }

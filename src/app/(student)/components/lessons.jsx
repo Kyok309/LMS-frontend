@@ -7,13 +7,14 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 export default function LessonsList({courseId, lessonId}) {
     const [lessons, setLessons] = useState([])
     const [isLoading, setIsLoading] = useState(true);
+    const BACKEND = process.env.NEXT_PUBLIC_BACKEND;
 
     useEffect(() => {
         const fetchLessons = async () => {
             try {
                 setIsLoading(true);
                 const session = await getSession();
-                const res = await fetch(`http://localhost:8000/api/method/lms_app.api.lesson.get_lessons?courseId=${courseId}`, {
+                const res = await fetch(`${BACKEND}.lesson.get_lessons?courseId=${courseId}`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",

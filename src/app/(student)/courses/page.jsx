@@ -36,13 +36,14 @@ export default function Courses() {
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
-    const [loading, setLoading] = useState(false);
-    const BASE_URL = "http://localhost:8000";
+    const [loading, setLoading] = useState(true);
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+    const BACKEND = process.env.NEXT_PUBLIC_BACKEND;
 
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const res = await fetch('http://localhost:8000/api/method/lms_app.api.category.get_categories/', {
+                const res = await fetch(`${BACKEND}.category.get_categories`, {
                     method: 'GET',
                     headers: {
                         "Content-Type": "application/json",
@@ -77,7 +78,7 @@ export default function Courses() {
                 params.append("search", searchQuery);
             }
 
-            const res = await fetch(`http://localhost:8000/api/method/lms_app.api.course.get_courses?${params.toString()}`, {
+            const res = await fetch(`${BACKEND}.course.get_courses?${params.toString()}`, {
                 method: 'GET',
                 headers: {
                     "Content-Type": "application/json",

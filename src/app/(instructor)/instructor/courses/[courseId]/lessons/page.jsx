@@ -204,7 +204,7 @@ export default function Lessons() {
                         <Reorder.Item
                            key={lesson.name}
                            value={lesson}
-                           className="cursor-grab rounded-2xl shadow p-4 flex items-center justify-between"
+                           className="bg-white cursor-grab rounded-2xl shadow p-4 flex items-center justify-between"
                         >
                            <div className="flex gap-4">
                               <span className="text-sm text-blue-500"><GripVertical/></span>

@@ -32,7 +32,8 @@ import { formatMoney } from "@/lib/utils";
 export default function InstructorCourses() {
     const [courses, setCourses] = useState([]);
     const [categories, setCategories] = useState([]);
-    const BASE_URL = "http://localhost:8000";
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+    const BACKEND = process.env.NEXT_PUBLIC_BACKEND;
     const [level, setLevel] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("");
     const [sortBy, setSortBy] = useState("creation_desc");
@@ -56,7 +57,7 @@ export default function InstructorCourses() {
             params.append("category", selectedCategory)
             params.append("search", searchQuery)
             
-            const res = await fetch(`http://localhost:8000/api/method/lms_app.api.course.get_courses_instructor?${params.toString()}`, {
+            const res = await fetch(`${BACKEND}.course.get_courses_instructor?${params.toString()}`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -104,7 +105,7 @@ export default function InstructorCourses() {
         const fetchCategories = async () => {
             const session = await getSession();
             try {
-                const res = await fetch('http://localhost:8000/api/method/lms_app.api.category.get_categories/', {
+                const res = await fetch(`${BACKEND}.category.get_categories`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
@@ -216,7 +217,7 @@ export default function InstructorCourses() {
             </div>
             <div className="flex flex-wrap xl:flex-nowrap justify-between gap-4">
                 <div className="flex flex-1 gap-2">
-                    <InputGroup>
+                    <InputGroup className="bg-white overflow-hidden">
                         <InputGroupInput
                             ref={searchRef}
                             value={searchQuery}
@@ -231,7 +232,7 @@ export default function InstructorCourses() {
                 </div>
                 <div className="flex gap-2">
                     <Select value={status} onValueChange={setStatus}>
-                        <SelectTrigger className="w-full h-11">
+                        <SelectTrigger className="w-full h-11 bg-white">
                             <SelectValue placeholder="Төлөв" />
                         </SelectTrigger>
                         <SelectContent>
@@ -243,7 +244,7 @@ export default function InstructorCourses() {
                         </SelectContent>
                     </Select>
                     <Select value={level} onValueChange={setLevel}>
-                        <SelectTrigger className="w-full h-11">
+                        <SelectTrigger className="w-full h-11 bg-white">
                             <SelectValue placeholder="Түвшин сонгох" />
                         </SelectTrigger>
                         <SelectContent>
@@ -256,7 +257,7 @@ export default function InstructorCourses() {
                         </SelectContent>
                     </Select>
                     <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                        <SelectTrigger className="w-full h-11">
+                        <SelectTrigger className="w-full h-11 bg-white">
                             <SelectValue placeholder="Ангилал сонгох" />
                         </SelectTrigger>
                         <SelectContent>
@@ -273,7 +274,7 @@ export default function InstructorCourses() {
                         </SelectContent>
                     </Select>
                     <Select value={sortBy} onValueChange={setSortBy}>
-                        <SelectTrigger className="w-full h-11">
+                        <SelectTrigger className="w-full h-11 bg-white">
                             <SelectValue placeholder="Эрэмбэ" />
                         </SelectTrigger>
                         <SelectContent>

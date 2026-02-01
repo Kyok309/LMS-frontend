@@ -14,16 +14,19 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import { formatDateTime, formatMoney } from "@/lib/utils";
+import Loading from "@/components/loading";
 
 export default function InstructorReport() {
-    const [payments, setPayments] = useState([]);
-    const [totalAmount, setTotalAmount] = useState(0);
+    const BACKEND = process.env.NEXT_PUBLIC_BACKEND;
+    const [ reportData, setReportData ] = useState();
+    const [ isLoading, setIsLoading ] = useState(true);
 
     useEffect(() => {
-        const fetchPayments = async () => {
+        const fetchReport = async () => {
             try {
+                setIsLoading(true);
                 const session = await getSession();
-                const res = await fetch("http://localhost:8000/api/method/lms_app.api.payment.get_payments_student", {
+                const res = await fetch(`${BACKEND}.report.get_report_instructor`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
@@ -32,56 +35,65 @@ export default function InstructorReport() {
                     }
                 })
                 const response = await res.json();
-                setPayments(response.data.payments || []);
-                setTotalAmount(response.data.total_paid_amount || 0);
+                console.log(response)
+                setReportData(response.data);
             } catch (error) {
                 console.log(error)
-                toast.error("Төлбөрийн мэдээлэл авахад алдаа гарлаа.");
+                toast.error("Тайлангийн мэдээлэл авахад алдаа гарлаа.");
+            } finally {
+                setIsLoading(false);
             }
         }
-        fetchPayments();
+        fetchReport();
     }, [])
 
+    if (isLoading) {
+        return <Loading/>
+    }
+
     return (
-        <div className="w-full flex flex-col">
+        <div className="w-full h-full flex flex-col">
             <div className="mb-6">
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">Тайлан</h2>
             </div>
-            <div>
+            <div className="border rounded-2xl shadow overflow-hidden">
                 <Table>
-                    <TableCaption>Төлбөрийн жагсаалт</TableCaption>
-                    <TableHeader>
+                    <TableCaption>Сургалтын тайлан</TableCaption>
+                    <TableHeader className="bg-gray-200">
                         <TableRow>
                             <TableHead>№</TableHead>
                             <TableHead>Сургалтын нэр</TableHead>
-                            <TableHead>Төлбөрийн хэлбэр</TableHead>
+                            <TableHead>Төлбөр</TableHead>
+                            <TableHead>Суралцагчдын тоо</TableHead>
+                            <TableHead>Нийт орлого</TableHead>
+                            <TableHead>Нийтэлсэн огноо</TableHead>
                             <TableHead>Төлөв</TableHead>
-                            <TableHead>Огноо</TableHead>
-                            <TableHead>Нийт үнийн дүн</TableHead>
+                            <TableHead>Зөвшөөрөл</TableHead>
                         </TableRow>
                     </TableHeader>
-                    <TableBody>
-                        {payments.map((payment, index) => (
+                    <TableBody className="bg-white">
+                        {reportData?.map((course, index) => (
                             <TableRow key={index}>
                                 <TableCell>{index+1}</TableCell>
-                                <TableCell className="font-medium">{payment.course_title}</TableCell>
-                                <TableCell>{payment.payment_method}</TableCell>
-                                <TableCell>
-                                    {payment.payment_status === "Paid" && "Төлсөн"}
-                                    {payment.payment_status === "Pending" && "Хүлээгдэж буй"}
-                                    {payment.payment_status === "Failed" && "Төлөгдөөгүй"}
+                                <TableCell className="font-medium">{course.course_title}</TableCell>
+                                {course.price_type === "Free" ? 
+                                    <TableCell className="">Үнэгүй</TableCell> :
+                                    <TableCell className="font-semibold">{formatMoney(course.price)}₮</TableCell>
+                                }
+                                <TableCell>{course.enrollments}</TableCell>
+                                <TableCell>{formatMoney(course.total_revenue)}₮</TableCell>
+                                <TableCell>{formatDateTime(course.published_on)}</TableCell>
+                                <TableCell
+                                    className={course.status === "Published" ? "text-green-500" : "text-gray-500"}>
+                                    {course.status}
                                 </TableCell>
-                                <TableCell>{formatDateTime(payment.paid_on)}</TableCell>
-                                <TableCell>{formatMoney(payment.amount)}₮</TableCell>
+                                <TableCell
+                                    className={course.workflow_state === "Approved" ? "text-green-500" : course.workflow_state === "Pending" ? "text-gray-500" : "text-red-500"}>
+                                    {course.workflow_state}
+                                </TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
-                    <TableFooter>
-                        <TableRow>
-                            <TableCell colSpan={5}>Нийт</TableCell>
-                            <TableCell className="">{formatMoney(totalAmount)}₮</TableCell>
-                        </TableRow>
-                    </TableFooter>
                 </Table>
             </div>
         </div>

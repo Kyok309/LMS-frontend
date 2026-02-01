@@ -13,17 +13,21 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { formatDate, formatDateTime, formatMoney } from "@/lib/utils";
+import { formatDateTime, formatMoney } from "@/lib/utils";
+import Loading from "@/components/loading";
 
 export default function InstructorPayments() {
+    const BACKEND = process.env.NEXT_PUBLIC_BACKEND;
     const [payments, setPayments] = useState([]);
     const [totalAmount, setTotalAmount] = useState(0);
+    const [ isLoading, setIsLoading ] = useState(true);
 
     useEffect(() => {
         const fetchPayments = async () => {
             try {
+                setIsLoading(true);
                 const session = await getSession();
-                const res = await fetch("http://localhost:8000/api/method/lms_app.api.payment.get_payments_instructor", {
+                const res = await fetch(`${BACKEND}.payment.get_payments_instructor`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
@@ -37,21 +41,26 @@ export default function InstructorPayments() {
             } catch (error) {
                 console.log(error)
                 toast.error("Төлбөрийн мэдээлэл авахад алдаа гарлаа.");
+            } finally {
+                setIsLoading(false);
             }
         }
         fetchPayments();
     }, [])
 
+    if ( isLoading ) {
+        return <Loading/>
+    }
     return (
         <div className="w-full flex flex-col">
             <div className="mb-6">
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">Миний төлбөр</h2>
             </div>
-            <div>
+            <div className="border rounded-2xl shadow overflow-hidden">
                 <Table>
                     <TableCaption>Төлбөрийн жагсаалт</TableCaption>
                     <TableHeader>
-                        <TableRow>
+                        <TableRow className="p-4">
                             <TableHead>№</TableHead>
                             <TableHead>Сургалтын нэр</TableHead>
                             <TableHead>Суралцагч</TableHead>
@@ -62,7 +71,7 @@ export default function InstructorPayments() {
                             <TableHead>Нийт үнийн дүн</TableHead>
                         </TableRow>
                     </TableHeader>
-                    <TableBody>
+                    <TableBody className="bg-white">
                         {payments.map((payment, index) => (
                             <TableRow key={index}>
                                 <TableCell>{index+1}</TableCell>
@@ -80,7 +89,7 @@ export default function InstructorPayments() {
                             </TableRow>
                         ))}
                     </TableBody>
-                    <TableFooter>
+                    <TableFooter className="bg-white">
                         <TableRow>
                             <TableCell colSpan={7}>Нийт</TableCell>
                             <TableCell className="">{formatMoney(totalAmount)}₮</TableCell>

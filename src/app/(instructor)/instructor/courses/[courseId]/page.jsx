@@ -29,7 +29,8 @@ export default function CourseDetail() {
     const [categories, setCategories] = useState([]);
     const params = useParams();
     const pathname = usePathname();
-    const BASE_URL = "http://localhost:8000";
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+    const BACKEND = process.env.NEXT_PUBLIC_BACKEND;
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const [course, setCourse] = useState({
@@ -51,7 +52,7 @@ export default function CourseDetail() {
         try {
             setIsLoading(true)
             const session = await getSession();
-            const res = await fetch('http://localhost:8000/api/method/lms_app.api.category.get_categories/', {
+            const res = await fetch(`${BACKEND}.category.get_categories`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -74,7 +75,7 @@ export default function CourseDetail() {
         try {
             setIsLoading(true);
             const session = await getSession();
-            const res = await fetch(`http://localhost:8000/api/method/lms_app.api.course.get_course_instructor?id=${params.courseId}`, {
+            const res = await fetch(`${BACKEND}.course.get_course_instructor?id=${params.courseId}`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -126,7 +127,7 @@ export default function CourseDetail() {
         form.append("fieldname", "thumbnail")
         const session = await getSession();
 
-        const upload = await fetch("http://localhost:8000/api/method/upload_file", {
+        const upload = await fetch(`${BASE_URL}/api/method/upload_file`, {
             method: "POST",
             headers: {
                 "Accept": "application/json",
@@ -148,7 +149,7 @@ export default function CourseDetail() {
     const updateCourse = async () => {
         try {
             const session = await getSession();
-            const res = await fetch("http://localhost:8000/api/method/lms_app.api.course.update_course", {
+            const res = await fetch(`${BACKEND}.course.update_course`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -179,7 +180,7 @@ export default function CourseDetail() {
     const deleteCourse = async () => {
         try {
             const session = await getSession();
-            const res = await fetch(`http://localhost:8000/api/method/lms_app.api.course.delete_course?courseId=${params.courseId}`, {
+            const res = await fetch(`${BACKEND}.course.delete_course?courseId=${params.courseId}`, {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
@@ -307,7 +308,7 @@ export default function CourseDetail() {
                         <Label htmlFor="thumbnail">
                             Зураг
                         </Label>
-                        <div className="border-input w-full flex flex-col items-center rounded-md border bg-transparent p-4 shadow-xs">
+                        <div className="bg-white border-input w-full flex flex-col items-center rounded-md border bg-transparent p-4 shadow-xs">
                             {
                                 course.thumbnail ?
                                     <div className="relative w-fit">

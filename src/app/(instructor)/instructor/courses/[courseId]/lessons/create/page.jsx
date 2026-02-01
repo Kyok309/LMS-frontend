@@ -66,7 +66,7 @@ export default function CreateLesson() {
         form.append("is_private", 1);
         const session = await getSession();
 
-        const upload = await fetch("http://localhost:8000/api/method/upload_file", {
+        const upload = await fetch(`${BASE_URL}/api/method/upload_file`, {
             method: "POST",
             headers: {
                 "Accept": "application/json",
@@ -195,7 +195,7 @@ export default function CreateLesson() {
                     {lesson?.lesson_content.map((item, index) => {
                         if (item.content_type !== "Video") return null;
                         return (
-                            <div key={index} className="relative flex flex-col gap-6 border py-8 px-6 rounded-lg">
+                            <div key={index} className="bg-white relative flex flex-col gap-6 border py-8 px-6 rounded-lg">
                                 <Button
                                     onClick={()=>{deleteContent(index)}}
                                     className="w-fit absolute top-4 right-6"
@@ -246,7 +246,7 @@ export default function CreateLesson() {
                     {lesson?.lesson_content.map((item, index) => {
                         if (item.content_type !== "Text") return null;
                         return (
-                            <div key={index} className="relative flex flex-col border py-8 px-6 rounded-lg gap-6">
+                            <div key={index} className="bg-white relative flex flex-col border py-8 px-6 rounded-lg gap-6">
                                 <Button
                                     onClick={()=>{deleteContent(index)}}
                                     className="w-fit absolute top-4 right-6"
@@ -293,7 +293,7 @@ export default function CreateLesson() {
                     {lesson?.lesson_content.map((item, index) => {
                         if (item.content_type !== "File") return null;
                         return (
-                            <div key={index} className="relative flex flex-col gap-6 border py-8 px-6 rounded-lg">
+                            <div key={index} className="bg-white relative flex flex-col gap-6 border py-8 px-6 rounded-lg">
                                 <Button
                                     onClick={()=>{deleteContent(index)}}
                                     className="w-fit absolute top-4 right-6"
@@ -338,7 +338,7 @@ export default function CreateLesson() {
                     {lesson?.lesson_content.map((item, index) => {
                         if (item.content_type !== "Link") return null;
                         return (
-                            <div key={index} className="relative flex flex-col gap-6 border py-8 px-6 rounded-lg">
+                            <div key={index} className="bg-white relative flex flex-col gap-6 border py-8 px-6 rounded-lg">
                                 <Button
                                     onClick={()=>{deleteContent(index)}}
                                     className="w-fit absolute top-4 right-6"

@@ -328,7 +328,7 @@ export default function Quiz() {
                                 <h3 className="text-xl font-semibold flex gap-2 items-center">
                                     <History className="text-blue-600" /> Таны өмнөх шалгалтууд
                                 </h3>
-                                <div className="rounded-xl overflow-clip border border-gray-200 shadow-sm">
+                                <div className="rounded-xl overflow-hidden border border-gray-200 shadow-sm">
                                     <Table>
                                         <TableHeader className="bg-gray-100">
                                             <TableRow>

@@ -18,12 +18,13 @@ import { formatDateTime, formatMoney } from "@/lib/utils";
 export default function Payments() {
     const [payments, setPayments] = useState([]);
     const [totalAmount, setTotalAmount] = useState(0);
+    const BACKEND = process.env.NEXT_PUBLIC_BACKEND;
 
     useEffect(() => {
         const fetchPayments = async () => {
             try {
                 const session = await getSession();
-                const res = await fetch("http://localhost:8000/api/method/lms_app.api.payment.get_payments_student", {
+                const res = await fetch(`${BACKEND}.payment.get_payments_student`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",

@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select"
 
 export default function AuthClient() {
+  const BACKEND = process.env.NEXT_PUBLIC_BACKEND;
   const router = useRouter();
   const [newUser, setNewUser] = useState({
     firstname: "",
@@ -90,7 +91,7 @@ export default function AuthClient() {
       };
       console.log("Payload:", payload);
       try {
-        const res = await fetch("http://localhost:8000/api/method/lms_app.api.auth.signup/", {
+        const res = await fetch(`${BACKEND}.auth.signup`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",

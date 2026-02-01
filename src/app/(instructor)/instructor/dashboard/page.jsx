@@ -1,76 +1,61 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Users, BookOpen, CheckCircle2, DollarSign, TrendingUp, Eye } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { getSession } from "next-auth/react";
+import Loading from "@/components/loading";
+import { formatMoney } from "@/lib/utils";
 
 export default function InstructorDashboard() {
-  // Mock data
-  const [courses] = useState([
-    {
-      id: 1,
-      title: 'React Fundamentals',
-      enrollments: 45,
-      revenue: 4500,
-      avgQuizScore: 82,
-      lessons: 12,
-      isPaid: true,
-    },
-    {
-      id: 2,
-      title: 'JavaScript Basics',
-      enrollments: 78,
-      revenue: 0,
-      avgQuizScore: 76,
-      lessons: 20,
-      isPaid: false,
-    },
-    {
-      id: 3,
-      title: 'Advanced Node.js',
-      enrollments: 32,
-      revenue: 3200,
-      avgQuizScore: 88,
-      lessons: 15,
-      isPaid: true,
-    },
-  ]);
+  const BACKEND = process.env.NEXT_PUBLIC_BACKEND;
+  const [dashboardData, setDashboardData] = useState()
+  const [isLoading, setIsLoading] = useState(true)
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      try {
+        setIsLoading(true);
+        const session = await getSession()
+        const res = await fetch(`${BACKEND}.dashboard.get_dashboard_instructor`, {
+          method: "GET",
+          headers: {
+            "Accept": "application/json",
+            "Authorization": `Bearer ${session?.user?.accessToken}`
+          }
+        })
+        const response = await res.json()
+        console.log(response)
+        if (response.responseType === "ok") {
+          setDashboardData(response.data)
+        }
+      } catch (error) {
+        console.log(error)
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchDashboard()
+  }, [])
 
-  const [enrollmentTrend] = useState([
-    { month: 'Jan', enrollments: 25 },
-    { month: 'Feb', enrollments: 38 },
-    { month: 'Mar', enrollments: 52 },
-    { month: 'Apr', enrollments: 48 },
-    { month: 'May', enrollments: 65 },
-    { month: 'Jun', enrollments: 78 },
-  ]);
+  const combinedData = dashboardData?.total_enrollments.map(enrollment => {
+    const scoreData = dashboardData?.average_score_course.find(
+      score => score.course_title === enrollment.course_title
+    );
 
-  const [quizPerformance] = useState([
-    { lesson: 'Lesson 1', avgScore: 78 },
-    { lesson: 'Lesson 2', avgScore: 82 },
-    { lesson: 'Lesson 3', avgScore: 85 },
-    { lesson: 'Lesson 4', avgScore: 80 },
-    { lesson: 'Lesson 5', avgScore: 88 },
-  ]);
+    return {
+      title: enrollment.course_title,
+      enrollments: enrollment.enrollment,
+      avgQuizScore: scoreData?.avg.toFixed(2) || 0
+    };
+  });
 
-  const [courseDistribution] = useState([
-    { name: 'React', value: 45, color: '#3b82f6' },
-    { name: 'JavaScript', value: 78, color: '#8b5cf6' },
-    { name: 'Node.js', value: 32, color: '#ec4899' },
-  ]);
 
-  const [revenueData] = useState([
-    { course: 'React', revenue: 4500 },
-    { course: 'Node.js', revenue: 3200 },
-  ]);
-
-  const totalEnrollments = courses.reduce((sum, c) => sum + c.enrollments, 0);
-  const totalRevenue = courses.reduce((sum, c) => sum + c.revenue, 0);
-  const totalLessons = courses.reduce((sum, c) => sum + c.lessons, 0);
-  const avgScore = (courses.reduce((sum, c) => sum + c.avgQuizScore, 0) / courses.length).toFixed(1);
+  if (isLoading) {
+    return <Loading />
+  }
 
   return (
     <div className="w-full h-full">
@@ -85,55 +70,63 @@ export default function InstructorDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card className="">
             <CardHeader className="flex flex-row items-center justify-between space-y-0">
-              <CardTitle className="font-medium">Total Enrollments</CardTitle>
+              <CardTitle className="font-medium">Нийт суралцагчид</CardTitle>
               <Users className="h-6 w-6 text-blue-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{totalEnrollments}</div>
-              <p className="text-xs text-slate-800 mt-1">Across all courses</p>
+              <div className="text-2xl font-bold">
+                {dashboardData?.total_enrollments?.reduce((sum, item) => sum + item.enrollment, 0)}
+              </div>
+              <p className="text-xs text-slate-800 mt-1">Бүх сургалтаас</p>
             </CardContent>
           </Card>
 
           <Card className="">
             <CardHeader className="flex flex-row items-center justify-between space-y-0">
-              <CardTitle className="font-medium">Total Revenue</CardTitle>
+              <CardTitle className="font-medium">Нийт орлого</CardTitle>
               <DollarSign className="h-6 w-6 text-green-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">${totalRevenue.toLocaleString()}</div>
-              <p className="text-xs text-slate-800 mt-1">From paid courses</p>
+              <div className="text-2xl font-bold">
+                ₮{formatMoney(dashboardData?.total_revenue?.reduce((sum, item) => sum + item.revenue, 0))}
+              </div>
+              <p className="text-xs text-slate-800 mt-1">Төлбөртэй сургалтуудаас</p>
             </CardContent>
           </Card>
 
           <Card className="">
             <CardHeader className="flex flex-row items-center justify-between space-y-0">
-              <CardTitle className="font-medium">Total Lessons</CardTitle>
+              <CardTitle className="font-medium">Нийт хичээлүүд</CardTitle>
               <BookOpen className="h-6 w-6 text-purple-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{totalLessons}</div>
-              <p className="text-xs text-slate-800 mt-1">Published lessons</p>
+              <div className="text-2xl font-bold">
+                {dashboardData?.total_lessons?.reduce((sum, item) => sum + item.lessons, 0)}
+              </div>
+              <p className="text-xs text-slate-800 mt-1">Бүх сургалтуудаас</p>
             </CardContent>
           </Card>
 
           <Card className="">
             <CardHeader className="flex flex-row items-center justify-between space-y-0">
-              <CardTitle className="font-medium">Avg Quiz Score</CardTitle>
+              <CardTitle className="font-medium">Дундаж шалгалтын оноо</CardTitle>
               <CheckCircle2 className="h-6 w-6 text-emerald-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{avgScore}%</div>
-              <p className="text-xs text-slate-800 mt-1">Student performance</p>
+              <div className="text-2xl font-bold">
+                {(dashboardData?.average_score_course?.reduce((sum, item) => sum + item.avg, 0) / dashboardData?.average_score_course?.length).toFixed(2)}%
+              </div>
+              <p className="text-xs text-slate-800 mt-1">Суралцагчийн гүйцэтгэл</p>
             </CardContent>
           </Card>
         </div>
 
         {/* Charts */}
         <Tabs defaultValue="overview" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="courses">Courses</TabsTrigger>
-            <TabsTrigger value="performance">Performance</TabsTrigger>
+          <TabsList className="bg-gray-200">
+            <TabsTrigger value="overview">Ерөнхий</TabsTrigger>
+            <TabsTrigger value="courses">Сургалтууд</TabsTrigger>
+            <TabsTrigger value="performance">Гүйцэтгэл</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-4">
@@ -141,19 +134,19 @@ export default function InstructorDashboard() {
               {/* Enrollment Trend */}
               <Card className="lg:col-span-1">
                 <CardHeader>
-                  <CardTitle className="">Enrollment Trend</CardTitle>
-                  <CardDescription className="text-slate-800">Last 6 months</CardDescription>
+                  <CardTitle className="">Элсэлтийн тоо</CardTitle>
+                  <CardDescription className="text-slate-800">Сүүлийн 6 сард</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={300}>
-                    <LineChart data={enrollmentTrend}>
+                    <LineChart data={dashboardData?.enrollment_month}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#475569" />
-                      <XAxis stroke="#94a3b8" />
+                      <XAxis dataKey="month" stroke="#94a3b8"/>
                       <YAxis stroke="#94a3b8" />
-                      <Tooltip 
+                      <Tooltip
                         contentStyle={{ border: '1px solid #cad5e2', borderRadius: '8px' }}
                       />
-                      <Line type="monotone" dataKey="enrollments" stroke="#3b82f6" strokeWidth={2} dot={{ fill: '#3b82f6' }} />
+                      <Line type="monotone" dataKey="count" stroke="#3b82f6" strokeWidth={2} dot={{ fill: '#3b82f6' }} />
                     </LineChart>
                   </ResponsiveContainer>
                 </CardContent>
@@ -162,27 +155,29 @@ export default function InstructorDashboard() {
               {/* Course Distribution */}
               <Card className="">
                 <CardHeader>
-                  <CardTitle className="">Students per Course</CardTitle>
-                  <CardDescription className="text-slate-800">Distribution</CardDescription>
+                  <CardTitle className="">Сургалт дах суралцагчид</CardTitle>
+                  <CardDescription className="text-slate-800">Тархалт</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={300}>
                     <PieChart>
                       <Pie
-                        data={courseDistribution}
+                        data={dashboardData?.total_enrollments}
                         cx="50%"
                         cy="50%"
                         labelLine={false}
-                        label={({ name, value }) => `${name}: ${value}`}
+                        label={({ course_title }) => `${course_title}`}
                         outerRadius={80}
                         fill="#8884d8"
-                        dataKey="value"
+                        dataKey="enrollment"
+                        nameKey="course_title"
                       >
-                        {courseDistribution.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
+                        {dashboardData?.total_enrollments.map((entry, index) => {
+                          const randomColor = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
+                          return <Cell key={`cell-${index}`} fill={randomColor} />;
+                        })}
                       </Pie>
-                      <Tooltip 
+                      <Tooltip
                         contentStyle={{ border: '1px solid #cad5e2', borderRadius: '8px' }}
                       />
                     </PieChart>
@@ -195,16 +190,16 @@ export default function InstructorDashboard() {
           <TabsContent value="courses" className="space-y-4">
             <Card className="">
               <CardHeader>
-                <CardTitle className="">Course Analytics</CardTitle>
-                <CardDescription className="text-slate-800">Revenue and enrollment details</CardDescription>
+                <CardTitle className="">Сургалтын аналитик</CardTitle>
+                <CardDescription className="text-slate-800">Орлого ба элсэлтийн дэлгэрэнгүй</CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={400}>
-                  <BarChart data={courses}>
+                  <BarChart data={combinedData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#475569" />
                     <XAxis dataKey="title" stroke="#94a3b8" />
                     <YAxis stroke="#94a3b8" />
-                    <Tooltip 
+                    <Tooltip
                       contentStyle={{ border: '1px solid #cad5e2', borderRadius: '8px' }}
                     />
                     <Legend />
@@ -217,17 +212,17 @@ export default function InstructorDashboard() {
 
             <Card className="">
               <CardHeader>
-                <CardTitle className="">Revenue by Course</CardTitle>
+                <CardTitle className="">Сургалт дах орлого</CardTitle>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={revenueData}>
+                  <BarChart data={dashboardData?.total_revenue}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#475569" />
-                    <XAxis dataKey="course" stroke="#94a3b8" />
+                    <XAxis dataKey="course_title" stroke="#94a3b8" />
                     <YAxis stroke="#94a3b8" />
-                    <Tooltip 
+                    <Tooltip
                       contentStyle={{ border: '1px solid #cad5e2', borderRadius: '8px' }}
-                      formatter={(value) => `$${value}`}
+                      formatter={(value) => `₮${value}`}
                     />
                     <Bar dataKey="revenue" fill="#10b981" name="Revenue" />
                   </BarChart>
@@ -239,20 +234,20 @@ export default function InstructorDashboard() {
           <TabsContent value="performance" className="space-y-4">
             <Card className="">
               <CardHeader>
-                <CardTitle className="">Quiz Performance by Lesson</CardTitle>
-                <CardDescription className="text-slate-800">Average student scores</CardDescription>
+                <CardTitle className="">Сургалтын явц</CardTitle>
+                <CardDescription className="text-slate-800">Суралцагчдын гүйцэтгэл сургалтаар</CardDescription>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={quizPerformance}>
+                <ResponsiveContainer width="100%" height={500}>
+                  <BarChart data={dashboardData?.completion_rate}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#475569" />
-                    <XAxis dataKey="lesson" stroke="#94a3b8" />
+                    <XAxis dataKey="course_title" stroke="#94a3b8" angle={-45} textAnchor="end" height={200} interval={0} tick={{ fontSize: 12 }}/>
                     <YAxis stroke="#94a3b8" domain={[0, 100]} />
-                    <Tooltip 
+                    <Tooltip
                       contentStyle={{ border: '1px solid #cad5e2', borderRadius: '8px' }}
                       formatter={(value) => `${value}%`}
                     />
-                    <Bar dataKey="avgScore" fill="#f59e0b" name="Score %" />
+                    <Bar dataKey="completion_rate" fill="#f59e0b" name="Дуусгасан" />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>

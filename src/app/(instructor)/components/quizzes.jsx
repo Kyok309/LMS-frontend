@@ -82,7 +82,7 @@ export default function Quizzes({ lessonId }) {
                 {quizzes.length === 0 && <AddQuiz lessonId={lessonId} fetchQuizzes={fetchQuizzes} />}
             </div>
             {quizzes.length > 0 ?
-                <div className="rounded-2xl shadow border overflow-clip">
+                <div className="rounded-2xl shadow border overflow-hidden">
                     <Table>
                         <TableHeader className="bg-gray-200">
                             <TableRow>
@@ -94,7 +94,7 @@ export default function Quizzes({ lessonId }) {
                                 <TableHead className="text-center">Үйлдэл</TableHead>
                             </TableRow>
                         </TableHeader>
-                        <TableBody>
+                        <TableBody className="bg-white">
                             {quizzes.map((quiz, index) => (
                                 <TableRow key={index}>
                                     <TableCell className="font-medium text-center">{index + 1}</TableCell>

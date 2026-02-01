@@ -2,17 +2,19 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, AlertCircle, BookOpen, Calendar, CheckCircle2, Clock } from 'lucide-react';
+import { AlertCircle, BookOpen, Calendar, CheckCircle2, Clock, CircleCheck, Play } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { getSession } from 'next-auth/react';
 import Link from 'next/link';
 import { formatDate } from '@/lib/utils';
 import Loading from '@/components/loading';
+import { Button } from "@/components/ui/button";
 
 export default function EnrollmentsPage() {
     const [enrollments, setEnrollments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const BACKEND = process.env.NEXT_PUBLIC_BACKEND;
 
     useEffect(() => {
         const fetchEnrollments = async () => {
@@ -20,7 +22,7 @@ export default function EnrollmentsPage() {
                 setLoading(true);
                 const session = await getSession();
                 const res = await fetch(
-                    "http://localhost:8000/api/method/lms_app.api.enrollment.get_enrollments_student",
+                    `${BACKEND}.enrollment.get_enrollments_student`,
                     {
                         method: "GET",
                         headers: {
@@ -72,7 +74,7 @@ export default function EnrollmentsPage() {
 
     if (loading) {
         return (
-            <Loading/>
+            <Loading />
         );
     }
 
@@ -105,55 +107,66 @@ export default function EnrollmentsPage() {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {enrollments.map((enrollment, index) => (
-                        <Link href={`/courses/${enrollment.course}`} key={index}>
-                            <Card
-                                className="h-64 flex flex-col justify-between hover:shadow-lg transition-shadow duration-300"
-                            >
-                                <CardHeader>
-                                    <div className="flex items-start justify-between gap-2">
-                                        <div className="flex-1">
-                                            <CardTitle className="text-lg line-clamp-2">
-                                                {enrollment.course_title}
-                                            </CardTitle>
-                                        </div>
-                                        <Badge className={`flex items-center gap-1 ${getStatusColor(enrollment.completion_status)}`}>
-                                            {getStatusIcon(enrollment.completion_status)}
-                                            {enrollment.completion_status}
-                                        </Badge>
-                                    </div>
-                                    <CardDescription className="text-sm text-gray-500 truncate">
-                                        {enrollment.course_description}
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
-                                    <div className="space-y-2">
-                                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                                            <Calendar className="w-4 h-4" />
-                                            <span>Дундаж оноо: {enrollment.average_score.toFixed(2)}</span>
-                                        </div>
-                                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                                            <Calendar className="w-4 h-4" />
-                                            <span>{formatDate(enrollment.creation)}-д элссэн</span>
-                                        </div>
-                                    </div>
 
-                                    <div className="space-y-2">
-                                        <div className="flex items-center justify-between text-sm">
-                                            <span className="text-gray-600">Явц</span>
-                                            <span className="font-semibold text-gray-900">
-                                                {enrollment.progress_percentage.toFixed(1)}%
-                                            </span>
-                                        </div>
-                                        <div className="w-full bg-gray-200 rounded-full h-2">
-                                            <div
-                                                className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                                                style={{ width: `${enrollment.progress_percentage}%` }}
-                                            />
-                                        </div>
+                        <Card key={index}
+                            className="flex flex-col justify-between hover:shadow-lg transition-shadow duration-300"
+                        >
+                            <CardHeader>
+                                <div className="flex items-start justify-between gap-2">
+                                    <div className="flex-1">
+                                        <CardTitle className="text-lg line-clamp-2">
+                                            {enrollment.course_title}
+                                        </CardTitle>
                                     </div>
-                                </CardContent>
-                            </Card>
-                        </Link>
+                                    <Badge className={`flex items-center gap-1 ${getStatusColor(enrollment.completion_status)}`}>
+                                        {getStatusIcon(enrollment.completion_status)}
+                                        {enrollment.completion_status}
+                                    </Badge>
+                                </div>
+                                <CardDescription className="text-sm text-gray-500 truncate">
+                                    {enrollment.description}
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                                        <Calendar className="w-4 h-4" />
+                                        <span>Дундаж оноо: {enrollment.average_score.toFixed(2)}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                                        <Calendar className="w-4 h-4" />
+                                        <span>{formatDate(enrollment.creation)}-д элссэн</span>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <div className="flex items-center justify-between text-sm">
+                                        <span className="text-gray-600">Явц</span>
+                                        <span className="font-semibold text-gray-900">
+                                            {enrollment.progress_percentage.toFixed(1)}%
+                                        </span>
+                                    </div>
+                                    <div className="w-full bg-gray-200 rounded-full h-2">
+                                        <div
+                                            className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                                            style={{ width: `${enrollment.progress_percentage}%` }}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="w-full flex gap-4 flex-wrap justify-between">
+                                    <Button className="bg-blue-600 hover:bg-blue-700" asChild>
+                                        <Link href={`/courses/${enrollment.course}`}><Play />Үзэх</Link>
+                                    </Button>
+                                    {
+                                        enrollment.certificate_issued == 1 &&
+                                        <Button variant="outline" asChild>
+                                            <Link href={`/courses/${enrollment.course}/certificate`}>
+                                            <CircleCheck /> Сертификат харах</Link>
+                                        </Button>
+                                    }
+                                </div>
+                            </CardContent>
+                        </Card>
                     ))}
                 </div>
             )}

@@ -13,12 +13,14 @@ import { toast } from "sonner";
 export default function Profile() {
     const [studentProfile, setStudentProfile] = useState(null);
     const fileInputRef = useRef(null);
+    const BACKEND = process.env.NEXT_PUBLIC_BACKEND;
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     useEffect(() => {
         const fetchProfile = async () => {
             try {
                 const session = await getSession();
-                const res = await fetch(`http://localhost:8000/api/method/lms_app.api.student.get_student_profile`, {
+                const res = await fetch(`${BACKEND}.student.get_student_profile`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
@@ -59,7 +61,7 @@ export default function Profile() {
         form.append("file", file);
         const session = await getSession();
 
-        const upload = await fetch("http://localhost:8000/api/method/upload_file", {
+        const upload = await fetch(`${BASE_URL}/api/method/upload_file`, {
             method: "POST",
             headers: {
                 "Accept": "application/json",
@@ -82,7 +84,7 @@ export default function Profile() {
     const updateProfile = async () => {
         try {
             const session = await getSession();
-            const res = await fetch("http://localhost:8000/api/method/lms_app.api.student.update_student_profile", {
+            const res = await fetch(`${BACKEND}.student.update_student_profile`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -114,7 +116,7 @@ export default function Profile() {
                             studentProfile.profile ? 
                             <Avatar className="w-full h-full">
                                 <AvatarImage
-                                    src={`http://localhost:8000${studentProfile.profile}`}
+                                    src={`${BASE_URL}${studentProfile.profile}`}
                                     alt="Profile"
                                 /> 
                                 <AvatarFallback>Profile</AvatarFallback>

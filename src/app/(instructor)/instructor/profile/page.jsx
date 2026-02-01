@@ -1,12 +1,13 @@
 "use client";
 
+import ReviewList from "@/components/instructorReview";
 import Loading from "@/components/loading";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { BadgeCheck, Boxes, Briefcase, Edit, Mail, Phone, Save, School, Trash, UploadIcon, X } from "lucide-react";
+import { BadgeCheck, Boxes, Briefcase, Edit, Mail, Phone, Save, School, Star, Trash, UploadIcon, X } from "lucide-react";
 import { getSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -18,12 +19,14 @@ export default function Profile() {
     const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
     const BACKEND = process.env.NEXT_PUBLIC_BACKEND;
     const [isLoading, setIsLoading] = useState(true);
+    const [ currentView, setCurrentView ] = useState("about");
+
     useEffect(() => {
         const fetchInstructor = async () => {
             try {
                 setIsLoading(true);
                 const session = await getSession();
-                const res = await fetch(`http://localhost:8000/api/method/lms_app.api.instructor.get_instructor_profile?instructorId=${session?.user?.user?.email}`, {
+                const res = await fetch(`${BACKEND}.instructor.get_instructor_profile?instructorId=${session?.user?.user?.email}`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
@@ -62,10 +65,11 @@ export default function Profile() {
 
         const form = new FormData();
         form.append("file", file);
-        form.append("is_private", 1);
+        form.append("doctype", "User");
+        form.append("docname", instructor.name)
         const session = await getSession();
 
-        const upload = await fetch("http://localhost:8000/api/method/upload_file", {
+        const upload = await fetch(`${BASE_URL}/api/method/upload_file`, {
             method: "POST",
             headers: {
                 "Accept": "application/json",
@@ -114,7 +118,7 @@ export default function Profile() {
         return <Loading />
     }
     return (
-        <div className="w-full flex flex-col gap-6">
+        <div className="w-full bg-white flex flex-col gap-6">
             {!isEditting ?
                 <div className="rounded-xl shadow-sm border border-[#cfd7e7] overflow-hidden">
                     <div className="p-6 md:p-8">
@@ -122,7 +126,7 @@ export default function Profile() {
                             <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-start text-center sm:text-left w-full">
                                 <div className="relative group">
                                     <Avatar className="w-44 h-44 shadow border-white border-4">
-                                        <AvatarImage src={`${BASE_URL + instructor?.user_image}`} />
+                                        <AvatarImage src={`${BASE_URL}/api/method/frappe.utils.file_manager.download_file?file_url=${instructor?.user_image}`}/>
                                     </Avatar>
                                     <div className="absolute bottom-1 right-1 bg-green-500 border-2 border-white size-5 rounded-full"></div>
                                 </div>
@@ -133,6 +137,9 @@ export default function Profile() {
                                         <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                             <BadgeCheck /> Баталгаажсан
                                         </span>
+                                        <div className="flex items-center gap-2">
+                                            <Star fill="#fcc800" className="text-yellow-400"/> {instructor?.rating.toFixed(1)}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -145,79 +152,97 @@ export default function Profile() {
                         </div>
                     </div>
                     <div className="border-b border-[#cfd7e7] px-6 md:px-8">
-                        <div className="flex gap-8 overflow-x-auto no-scrollbar">
-                            <a className="flex flex-col items-center justify-center border-b-[3px] border-blue-500 text-[#0d121b] pb-3 pt-2 px-1" href="#">
-                                <p className="text-sm font-bold leading-normal tracking-wide">Миний тухай</p>
-                            </a>
-                            <a className="flex flex-col items-center justify-center border-b-[3px] border-transparent text-[#4c669a] pb-3 pt-2 px-1" href="#">
-                                <p className="text-sm font-bold leading-normal tracking-wide">Үнэлгээ</p>
-                            </a>
-                        </div>
+                        {currentView === "about" ?
+                            <div className="flex gap-8 overflow-x-auto no-scrollbar">
+                                <button className="flex items-center justify-center border-b-[3px] border-blue-500 text-[#0d121b] pb-3 pt-2 px-1" onClick={() => {setCurrentView("about")}}>
+                                    <p className="text-sm font-bold leading-normal tracking-wide">Миний тухай</p>
+                                </button>
+                                <button className="flex items-center justify-center border-b-[3px] border-transparent text-[#4c669a] pb-3 pt-2 px-1" onClick={() => {setCurrentView("rating")}}>
+                                    <p className="text-sm font-bold leading-normal tracking-wide">Үнэлгээ</p>
+                                </button>
+                            </div>
+                            :
+                            <div className="flex gap-8 overflow-x-auto no-scrollbar">
+                                <button className="flex items-center justify-center border-b-[3px] border-transparent text-[#4c669a]  pb-3 pt-2 px-1" onClick={() => {setCurrentView("about")}}>
+                                    <p className="text-sm font-bold leading-normal tracking-wide">Миний тухай</p>
+                                </button>
+                                <button className="flex items-center justify-center border-b-[3px] border-blue-500 text-[#0d121b] pb-3 pt-2 px-1" onClick={() => {setCurrentView("rating")}}>
+                                    <p className="text-sm font-bold leading-normal tracking-wide">Үнэлгээ</p>
+                                </button>
+                            </div>
+                        }
                     </div>
-                    <div className="flex flex-col gap-4 p-6 md:p-8">
-                        <div className="flex flex-col gap-2">
-                            <h3 className="text-lg font-bold text-[#0d121b]">Био</h3>
-                            <div className="w-full">{instructor?.bio}</div>
-                        </div>
-                        <div className="flex flex-col gap-2">
-                            <h3 className="text-lg font-bold text-[#0d121b]">Хувийн мэдээлэл</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-[30%_1fr] gap-x-6 gap-y-0">
-                                <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-subgrid border-b md:border-b-0 border-[#cfd7e7] py-5 items-center group hover:bg-gray-50 rounded-lg px-2 -mx-2">
-                                    <div className="flex items-center gap-3 mb-2 md:mb-0">
-                                        <div className="text-blue-500 size-10 rounded-full bg-blue-50 flex items-center justify-center">
-                                            <School />
+                    {currentView === "about" ? 
+                        <div className="flex flex-col gap-4 p-6 md:p-8">
+                            <div className="flex flex-col gap-2">
+                                <h3 className="text-lg font-bold text-[#0d121b]">Био</h3>
+                                <div className="w-full">{instructor?.bio}</div>
+                            </div>
+                            <div className="flex flex-col gap-2">
+                                <h3 className="text-lg font-bold text-[#0d121b]">Хувийн мэдээлэл</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-[30%_1fr] gap-x-6 gap-y-0">
+                                    <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-subgrid border-b md:border-b-0 border-[#cfd7e7] py-5 items-center group hover:bg-gray-50 rounded-lg px-2 -mx-2">
+                                        <div className="flex items-center gap-3 mb-2 md:mb-0">
+                                            <div className="text-blue-500 size-10 rounded-full bg-blue-50 flex items-center justify-center">
+                                                <School />
+                                            </div>
+                                            <p className="text-[#4c669a] text-sm font-medium">Мэргэшил</p>
                                         </div>
-                                        <p className="text-[#4c669a] text-sm font-medium">Мэргэшил</p>
+                                        <p className="text-[#0d121b] text-sm font-medium leading-relaxed pl-11 md:pl-0">{instructor?.qualification}</p>
                                     </div>
-                                    <p className="text-[#0d121b] text-sm font-medium leading-relaxed pl-11 md:pl-0">{instructor?.qualification}</p>
-                                </div>
-                                <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-subgrid border-b md:border-b-0 border-t border-[#cfd7e7] py-5 items-center group hover:bg-gray-50 rounded-lg px-2 -mx-2">
-                                    <div className="flex items-center gap-3 mb-2 md:mb-0">
-                                        <div className="text-blue-500 size-10 rounded-full bg-blue-50 flex items-center justify-center">
-                                            <Boxes />
+                                    <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-subgrid border-b md:border-b-0 border-t border-[#cfd7e7] py-5 items-center group hover:bg-gray-50 rounded-lg px-2 -mx-2">
+                                        <div className="flex items-center gap-3 mb-2 md:mb-0">
+                                            <div className="text-blue-500 size-10 rounded-full bg-blue-50 flex items-center justify-center">
+                                                <Boxes />
+                                            </div>
+                                            <p className="text-[#4c669a] text-sm font-medium">Чадвар</p>
                                         </div>
-                                        <p className="text-[#4c669a] text-sm font-medium">Чадвар</p>
+                                        <p className="text-[#0d121b] text-sm font-medium leading-relaxed pl-11 md:pl-0">{instructor?.expertise}</p>
                                     </div>
-                                    <p className="text-[#0d121b] text-sm font-medium leading-relaxed pl-11 md:pl-0">{instructor?.expertise}</p>
-                                </div>
-                                <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-subgrid border-b md:border-b-0 border-t border-[#cfd7e7] py-5 items-center group hover:bg-gray-50 rounded-lg px-2 -mx-2">
-                                    <div className="flex items-center gap-3 mb-2 md:mb-0">
-                                        <div className="text-blue-500 size-10 rounded-full bg-blue-50 flex items-center justify-center">
-                                            <Briefcase />
+                                    <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-subgrid border-b md:border-b-0 border-t border-[#cfd7e7] py-5 items-center group hover:bg-gray-50 rounded-lg px-2 -mx-2">
+                                        <div className="flex items-center gap-3 mb-2 md:mb-0">
+                                            <div className="text-blue-500 size-10 rounded-full bg-blue-50 flex items-center justify-center">
+                                                <Briefcase />
+                                            </div>
+                                            <p className="text-[#4c669a] text-sm font-medium">Туршлага</p>
                                         </div>
-                                        <p className="text-[#4c669a] text-sm font-medium">Туршлага</p>
+                                        <p className="text-[#0d121b] text-sm font-medium leading-relaxed pl-11 md:pl-0">{instructor?.experience}</p>
                                     </div>
-                                    <p className="text-[#0d121b] text-sm font-medium leading-relaxed pl-11 md:pl-0">{instructor?.experience}</p>
-                                </div>
-                                <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-subgrid border-t border-[#cfd7e7]  py-5 items-center group hover:bg-gray-50 rounded-lg px-2 -mx-2">
-                                    <div className="flex items-center gap-3 mb-2 md:mb-0">
-                                        <div className="text-blue-500 size-10 rounded-full bg-blue-50 flex items-center justify-center">
-                                            <Phone />
+                                    <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-subgrid border-t border-[#cfd7e7]  py-5 items-center group hover:bg-gray-50 rounded-lg px-2 -mx-2">
+                                        <div className="flex items-center gap-3 mb-2 md:mb-0">
+                                            <div className="text-blue-500 size-10 rounded-full bg-blue-50 flex items-center justify-center">
+                                                <Phone />
+                                            </div>
+                                            <p className="text-[#4c669a] text-sm font-medium">Утасны дугаар</p>
                                         </div>
-                                        <p className="text-[#4c669a] text-sm font-medium">Утасны дугаар</p>
+                                        <p className="text-[#0d121b] text-sm font-medium leading-relaxed pl-11 md:pl-0">{instructor?.phone}</p>
                                     </div>
-                                    <p className="text-[#0d121b] text-sm font-medium leading-relaxed pl-11 md:pl-0">{instructor?.phone}</p>
-                                </div>
-                                <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-subgrid border-t border-[#cfd7e7] py-5 items-center group hover:bg-gray-50 rounded-lg px-2 -mx-2">
-                                    <div className="flex items-center gap-3 mb-2 md:mb-0">
-                                        <div className="text-blue-500 size-10 rounded-full bg-blue-50 flex items-center justify-center">
-                                            <Phone />
+                                    <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-subgrid border-t border-[#cfd7e7] py-5 items-center group hover:bg-gray-50 rounded-lg px-2 -mx-2">
+                                        <div className="flex items-center gap-3 mb-2 md:mb-0">
+                                            <div className="text-blue-500 size-10 rounded-full bg-blue-50 flex items-center justify-center">
+                                                <Phone />
+                                            </div>
+                                            <p className="text-[#4c669a] text-sm font-medium">И-мейл</p>
                                         </div>
-                                        <p className="text-[#4c669a] text-sm font-medium">И-мейл</p>
+                                        <p className="text-[#0d121b] text-sm font-medium leading-relaxed pl-11 md:pl-0">{instructor?.email}</p>
                                     </div>
-                                    <p className="text-[#0d121b] text-sm font-medium leading-relaxed pl-11 md:pl-0">{instructor?.email}</p>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div> :
+                        :
+                        <div className="flex flex-col gap-4 p-6 md:p-8">
+                            <ReviewList instructorId={instructor?.name}/>
+                        </div>
+                    }
+                </div>
+                :
                 <div className="flex flex-col gap-8 rounded-xl p-8 shadow-sm border border-[#cfd7e7] overflow-hidden">
                     <div className="w-full flex justify-between">
                         <div className="flex gap-12">
                             <div className="flex flex-col gap-4">
                                 <div className="relative group">
                                     <Avatar className="w-44 h-44 shadow border-white border-4">
-                                        <AvatarImage src={`${BASE_URL + instructor?.user_image}`} />
+                                        <AvatarImage src={`${BASE_URL }/api/method/frappe.utils.file_manager.download_file?file_url=${instructor?.user_image}`} />
                                     </Avatar>
                                     <div className="absolute bottom-1 right-1 bg-green-500 border-2 border-white size-5 rounded-full"></div>
                                 </div>

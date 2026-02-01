@@ -1,10 +1,14 @@
 import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
+let isLoading = false;
+const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+const BACKEND = process.env.NEXT_PUBLIC_BACKEND;
 
 async function refreshAccessToken(token) {
   try {
+    isLoading = true;
     const res = await fetch(
-      "http://localhost:8000/api/method/frappe.integrations.oauth2.get_token",
+      `${BASE_URL}/api/method/frappe.integrations.oauth2.get_token`,
       {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -33,11 +37,12 @@ async function refreshAccessToken(token) {
     };
   } catch (error) {
     console.error("Refresh Token Error", error);
-
     return {
       ...token,
       error: "RefreshAccessTokenError",
     };
+  } finally {
+    isLoading = false;
   }
 }
  
@@ -52,7 +57,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       },
       async authorize(credentials) {
         try {
-          const res = await fetch("http://localhost:8000/api/method/lms_app.api.auth.login", {
+          const res = await fetch(`${BACKEND}.auth.login`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -105,7 +110,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       const timeUntilExpiry = token.expiresIn - now;
       const bufferTime = 60 * 1000; // 60 seconds
       
-      if (timeUntilExpiry < bufferTime) {
+      if (timeUntilExpiry < bufferTime && !isLoading) {
         console.log(`Token expiring in ${timeUntilExpiry / 1000}s, refreshing now...`);
         return await refreshAccessToken(token);
       }

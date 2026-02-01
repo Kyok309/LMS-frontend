@@ -11,6 +11,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 
 const AddCourse = ({ categories, fetchCourses }) => {
+    const BACKEND = process.env.NEXT_PUBLIC_BACKEND;
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
     const [course, setCourse] = useState({
         course_title: "",
         category: "",
@@ -49,7 +51,7 @@ const AddCourse = ({ categories, fetchCourses }) => {
         form.append("file", file);
         const session = await getSession();
 
-        const upload = await fetch("http://localhost:8000/api/method/upload_file", {
+        const upload = await fetch(`${BASE_URL}/api/method/upload_file`, {
             method: "POST",
             headers: {
                 "Accept": "application/json",
@@ -75,7 +77,7 @@ const AddCourse = ({ categories, fetchCourses }) => {
         try {
             setIsLoading(true);
             const session = await getSession();
-            const res = await fetch('http://localhost:8000/api/method/lms_app.api.course.create_course', {
+            const res = await fetch(`${BACKEND}.course.create_course`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

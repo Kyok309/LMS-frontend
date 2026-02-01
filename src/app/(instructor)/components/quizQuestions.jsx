@@ -31,6 +31,7 @@ export default function QuizQuestions({ quizId, fetchQuiz }) {
       order: ""
    });
    const BACKEND = process.env.NEXT_PUBLIC_BACKEND;
+   const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
    const [isLoading, setIsLoading] = useState(false);
 
 
@@ -132,7 +133,7 @@ export default function QuizQuestions({ quizId, fetchQuiz }) {
       form.append("is_private", 1);
       const session = await getSession();
 
-      const upload = await fetch("http://localhost:8000/api/method/upload_file", {
+      const upload = await fetch(`${BASE_URL}/api/method/upload_file`, {
          method: "POST",
          headers: {
             "Accept": "application/json",
@@ -308,7 +309,7 @@ export default function QuizQuestions({ quizId, fetchQuiz }) {
          </div>
          {
             questions.length > 0 ?
-               <div className="rounded-2xl shadow border overflow-clip">
+               <div className="rounded-2xl shadow border overflow-hidden">
                   <Table>
                      <TableHeader className="bg-gray-200">
                         <TableRow>
@@ -318,7 +319,7 @@ export default function QuizQuestions({ quizId, fetchQuiz }) {
                            <TableHead className="text-center">Үйлдэл</TableHead>
                         </TableRow>
                      </TableHeader>
-                     <TableBody>
+                     <TableBody className="bg-white">
                         {questions?.map((q) => (
                            <TableRow key={q.order}>
                               <TableCell className="text-center">{q.order}</TableCell>

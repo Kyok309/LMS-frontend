@@ -8,6 +8,7 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/in
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
+import Loading from "@/components/loading";
 
 export default function InstructorSettings() {
     const router = useRouter();
@@ -17,10 +18,11 @@ export default function InstructorSettings() {
     const [oldPassword, setOldPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [confirmNewPassword, setConfirmNewPassword] = useState("");
+    const [isLoading, setIsLoading] = useState(true);
 
     async function connectStripe() {
         const res = await fetch(
-            "http://localhost:8000/api/method/lms_app.api.stripe.create_onboarding_link",
+            `${BACKEND}.stripe.create_onboarding_link`,
             {
                 method: "POST",
                 headers: {
@@ -37,22 +39,28 @@ export default function InstructorSettings() {
     }
 
     const fetchStripeAccount = async () => {
-        const session = await getSession();
-        const res = await fetch(
-            `${BACKEND}.stripe.get_stripe_account_status`,
-            {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Accept": "application/json",
-                    "Authorization": `Bearer ${session?.user?.accessToken}`
+        try {
+            setIsLoading(true);
+            const session = await getSession();
+            const res = await fetch(
+                `${BACKEND}.stripe.get_stripe_account_status`,
+                {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Accept": "application/json",
+                        "Authorization": `Bearer ${session?.user?.accessToken}`
+                    }
                 }
-            }
-        );
-
-        const response = await res.json();
-        setStripeAccount(response.data);
-        console.log(response);
+            );
+            const response = await res.json();
+            setStripeAccount(response.data);
+            console.log(response);
+        } catch (error) {
+            console.log(error)
+        } finally {
+            setIsLoading(false);
+        }
     }
 
     useEffect(() => {
@@ -113,6 +121,10 @@ export default function InstructorSettings() {
         }
     }
 
+    if (isLoading) {
+        return <Loading/>
+    }
+
     return (
         <div className="flex flex-col gap-8">
             <div className="flex flex-col gap-4">
@@ -120,7 +132,7 @@ export default function InstructorSettings() {
                 <div className="flex items-end gap-10">
                     <div className="flex flex-col gap-4">
                         <Label>Stripe хаяг ID</Label>
-                        <p className="border border-gray-200 rounded-md shadow-xs px-4 py-2 font-semibold text-blue-500">
+                        <p className="bg-white border border-gray-200 rounded-md shadow-xs px-4 py-2 font-semibold text-blue-500">
                             {stripeAccount?.account_id}
                         </p>
                     </div>
@@ -210,12 +222,10 @@ export default function InstructorSettings() {
                                 </Button>
                             </InputGroupAddon>
                         </InputGroup>
-                        {confirmNewPassword.length > 0 && passwordsMatch ? 
-                            null
-                            :
+                        {confirmNewPassword.length > 0 && !passwordsMatch &&
                             <p className="text-red-500">
                                 Passwords do not match
-                            </p> 
+                            </p>
                         }
                     </div>
                     <Button size="lg" onClick={changePassword} className="mt-7 bg-blue-900 hover:bg-blue-800">
