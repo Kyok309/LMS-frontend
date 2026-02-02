@@ -68,16 +68,24 @@ export default function NotificationBell() {
          reconnectionDelay: 1000,
          reconnectionDelayMax: 5000,
          reconnectionAttempts: 5,
-         transports: ['websocket', 'polling']
+         transports: ['websocket', 'polling'],
+         secure:false,
+         rejectUnauthorized: false,
+         extraHeaders: {
+            'Authorization': `Bearer ${accessToken}`
+         }
       })
 
       socket.on('connect', () => {
          console.log('✅ socket connected successfully')
       })
 
-      socket.on('connect_error', (err) => {
-         console.error('❌ socket connect_error:', err)
+      socket.on('connect_error', (error) => {
+         console.error('❌ Connect error:', error);
          
+      })
+      socket.io.engine.on('error', (error) => {
+         console.error('❌ Engine error:', error);
       })
 
       socket.on('disconnect', () => {
