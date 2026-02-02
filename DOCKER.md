@@ -1,8 +1,8 @@
-# Docker Setup Guide
+# Docker тохиргооны заавар
 
-## Building the Image
+## Image build хийх
 
-Build the Docker image with environment variables:
+Орчны хувьсагчуудыг ашиглан Docker image build хийх:
 
 ```bash
 ./docker-build.sh
@@ -18,15 +18,15 @@ docker build \
   -t lms-frontend .
 ```
 
-## Running the Container
+## Контейнер ажиллуулах
 
-### Important: Backend URL Configuration
+### Чухал: Backend URL тохиргоо
 
-**If you get `ECONNREFUSED` errors**, it's likely because your backend URL uses `localhost` or `127.0.0.1`. Inside a Docker container, `localhost` refers to the container itself, not your host machine.
+Хэрвээ **`ECONNREFUSED` алдаа** гарвал ихэнхдээ backend URL нь `localhost` эсвэл `127.0.0.1`-ыг зааж байдагтай холбоотой. Docker контейнер дотор `localhost` нь **контейнер өөрийг нь** заадаг бөгөөд таны host машин биш.
 
-#### Solution 1: Backend on Host Machine
+#### Хувилбар 1: Backend нь host машин дээр ажиллаж байгаа үед
 
-**On Linux:**
+**Linux дээр:**
 ```bash
 # Use host.docker.internal or the host's IP address
 # In your .env file, set:
@@ -35,20 +35,20 @@ NEXT_PUBLIC_BACKEND=http://172.17.0.1:8000
 NEXT_PUBLIC_BACKEND=http://host.docker.internal:8000
 ```
 
-**On Mac/Windows:**
+**Mac/Windows дээр:**
 ```bash
 # Use host.docker.internal
 NEXT_PUBLIC_BACKEND=http://host.docker.internal:8000
 ```
 
-**Run with network access:**
+**Host руу сүлжээний хандалттайгаар ажиллуулах:**
 ```bash
 docker run -p 3000:3000 --add-host=host.docker.internal:host-gateway --env-file .env lms-frontend
 ```
 
-#### Solution 2: Backend in Another Container (Docker Compose)
+#### Хувилбар 2: Backend нь өөр Docker контейнерт (Docker Compose)
 
-Create a `docker-compose.yml`:
+`docker-compose.yml` файл үүсгэнэ:
 
 ```yaml
 version: '3.8'
@@ -81,46 +81,51 @@ networks:
     driver: bridge
 ```
 
-Then use the service name as the backend URL:
+Дараа нь backend URL дээр service name-ийг ашиглана:
 ```bash
 NEXT_PUBLIC_BACKEND=http://backend:8000
 ```
 
-#### Solution 3: External Backend
+#### Хувилбар 3: Гадаад (external) backend
 
-If your backend is accessible via a public URL or IP:
+Хэрвээ backend тань public URL эсвэл IP-ээр гаднаас нэвтрэх боломжтой бол:
 ```bash
 NEXT_PUBLIC_BACKEND=http://your-backend-ip:8000
 # OR
 NEXT_PUBLIC_BACKEND=https://api.yourdomain.com
 ```
 
-## Environment Variables
+## Орчны хувьсагчууд (Environment Variables)
 
-### Required Build-Time Variables (NEXT_PUBLIC_*)
-These are embedded into the JavaScript bundle at build time:
-- `NEXT_PUBLIC_BACKEND_URL` - Full backend URL
+### Build-time үед шаардлагатай хувьсагчууд (NEXT_PUBLIC_*)
+
+Эдгээр хувьсагчууд нь **build хийх үед** JavaScript bundle дотор “шингэж” ордог:
+
+- `NEXT_PUBLIC_BACKEND_URL` - Backend-ийн бүрэн URL
 - `NEXT_PUBLIC_BACKEND` - Backend API base URL
 - `NEXT_PUBLIC_SOCKET_URL` - WebSocket URL
 
-### Required Runtime Variables
-These are passed at runtime via `--env-file`:
+### Runtime үед шаардлагатай хувьсагчууд
+
+Эдгээр хувьсагчууд контейнерийг ажиллуулах үед `--env-file`-ээр дамжина:
+
 - `FRAPPE_CLIENT_ID` - OAuth client ID
 - `FRAPPE_CLIENT_SECRET` - OAuth client secret
 
-## Troubleshooting
+## Алдаа засвар (Troubleshooting)
 
-### Error: `ECONNREFUSED`
-- Check that your backend URL doesn't use `localhost` or `127.0.0.1`
-- Use `host.docker.internal` (Mac/Windows) or host IP (Linux)
-- Ensure backend is running and accessible
-- Check firewall settings
+### Алдаа: `ECONNREFUSED`
 
-### Error: `undefined.auth.get_me`
-- Rebuild the image with `NEXT_PUBLIC_*` variables as build args
-- Ensure all `NEXT_PUBLIC_*` variables are set during build
+- Backend URL дээр `localhost` эсвэл `127.0.0.1` ашиглаагүй эсэхийг шалгана
+- Mac/Windows дээр `host.docker.internal`, Linux дээр host IP ашиглана
+- Backend чинь үнэхээр ажиллаж байгаа, хандалт нээлттэй (port, firewall) эсэхийг шалгана
 
-### Error: Module not found during build
-- Ensure devDependencies are installed (they're needed for the build)
-- Check that `npm ci` runs without `NODE_ENV=production` set
+### Алдаа: `undefined.auth.get_me`
 
+- Image-ээ `NEXT_PUBLIC_*` хувьсагчдыг build аргумент болгон тохируулж **дахин build** хийнэ
+- Build хийх үед бүх `NEXT_PUBLIC_*` хувьсагчууд зөв утгатайгаар өгөгдсөн эсэхийг нягтална
+
+### Алдаа: Module not found during build
+
+- `devDependencies` бүгд суусан эсэхийг шалга (build хийхэд шаардлагатай)
+- `npm ci` команд `NODE_ENV=production` тохиргоогүй үед (эсвэл devDependencies алгасагдаагүй эсэхийг) шалгаж ажиллуулна
