@@ -11,15 +11,6 @@ export default function StudentDashboard() {
   const BACKEND = process.env.NEXT_PUBLIC_BACKEND;
   const [dashboardData, setDashboardData] = useState();
   const [isLoading, setIsLoading] = useState(true);
-  
-
-  const [quizScores] = useState([
-    { quiz: 'React Quiz 1', score: 82 },
-    { quiz: 'React Quiz 2', score: 88 },
-    { quiz: 'React Quiz 3', score: 85 },
-    { quiz: 'JS Quiz 1', score: 90 },
-    { quiz: 'JS Quiz 2', score: 94 },
-  ]);
 
   useEffect(() => {
     const fetchDashboard = async () => {

@@ -114,7 +114,11 @@ export default function InstructorDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {(dashboardData?.average_score_course?.reduce((sum, item) => sum + item.avg, 0) / dashboardData?.average_score_course?.length).toFixed(2)}%
+                {dashboardData.average_score_course.length >0 ?
+                  (dashboardData?.average_score_course?.reduce((sum, item) => sum + item.avg, 0) / dashboardData?.average_score_course?.length).toFixed(2)
+                  :
+                  0
+                }%
               </div>
               <p className="text-xs text-slate-800 mt-1">Суралцагчийн гүйцэтгэл</p>
             </CardContent>

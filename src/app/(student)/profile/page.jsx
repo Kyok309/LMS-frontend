@@ -76,9 +76,9 @@ export default function Profile() {
 
         setStudentProfile(prev => ({
             ...prev,
-            profile: fileUrl
+            user_image: fileUrl
         }))
-        console.log(studentProfile.profile)
+        console.log(studentProfile.user_image)
     }
 
     const updateProfile = async () => {
@@ -113,10 +113,10 @@ export default function Profile() {
                 <div className="w-full bg-white flex flex-col items-center gap-10 shadow-lg rounded-lg py-8 px-14">
                     <div className="w-50 h-50 relative">
                         {
-                            studentProfile.profile ? 
+                            studentProfile.user_image ? 
                             <Avatar className="w-full h-full">
                                 <AvatarImage
-                                    src={`${BASE_URL}${studentProfile.profile}`}
+                                    src={`${BASE_URL}${studentProfile.user_image}`}
                                     alt="Profile"
                                 /> 
                                 <AvatarFallback>Profile</AvatarFallback>

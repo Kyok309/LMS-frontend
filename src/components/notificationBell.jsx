@@ -60,9 +60,9 @@ export default function NotificationBell() {
       console.log(accessToken)
 
       const socket = io(SOCKET_URL, {
-         path: "/socket.io/",
-         auth: {
-            token: `Bearer ${accessToken}`
+         path: "/socket.io",
+         auth: (cb) => {
+            cb({ token: `Bearer ${accessToken}` });
          },
          reconnection: true,
          reconnectionDelay: 1000,

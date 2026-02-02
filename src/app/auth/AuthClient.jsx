@@ -90,6 +90,7 @@ export default function AuthClient() {
         role: newUser.role
       };
       console.log("Payload:", payload);
+      
       try {
         const res = await fetch(`${BACKEND}.auth.signup`, {
           method: "POST",
@@ -101,11 +102,12 @@ export default function AuthClient() {
 
         console.log("Response:", response);
 
-        toast.success(response.desc);
-
         if (response.responseType === "ok") {
           setMode("login");
           router.push("/auth?login");
+          toast.success(response.desc);
+        } else {
+          toast.error(response.desc);
         }
       } catch (err) {
         toast.error(err.desc || "Алдаа гарсан.");
