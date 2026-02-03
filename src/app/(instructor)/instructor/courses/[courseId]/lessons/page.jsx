@@ -64,11 +64,11 @@ export default function Lessons() {
          if (response.responseType === "ok") {
             setLessons(response.data);
 
-         } else (
+         } else {
             toast.error(response.desc)
-         )
+         }
       } catch (error) {
-         toast.error(error.message);
+         toast.error(error);
       } finally {
          setIsLoading(false);
       }
