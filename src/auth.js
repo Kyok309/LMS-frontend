@@ -1,14 +1,12 @@
 import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
 let isLoading = false;
-const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
-const BACKEND = process.env.NEXT_PUBLIC_BACKEND;
 
 async function refreshAccessToken(token) {
   try {
     isLoading = true;
     const res = await fetch(
-      `${BASE_URL}/api/method/frappe.integrations.oauth2.get_token`,
+      `${process.env.BACKEND_URL_INTERNAL}/api/method/frappe.integrations.oauth2.get_token`,
       {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -57,7 +55,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       },
       async authorize(credentials) {
         try {
-          const res = await fetch(`${BACKEND}.auth.login`, {
+          const res = await fetch(`${process.env.BACKEND_URL_INTERNAL}/api/method/lms_app.api.auth.login`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",

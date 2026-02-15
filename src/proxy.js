@@ -68,7 +68,7 @@ export async function proxy(request) {
   }
   
   const fetchEnrollmentStatus = async () => {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}.enrollment.check_enrollment_api?courseId=${pathname.split("/")[2]}`, {
+    const res = await fetch(`${process.env.BACKEND_URL_INTERNAL}/api/method/lms_app.api.enrollment.check_enrollment_api?courseId=${pathname.split("/")[2]}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

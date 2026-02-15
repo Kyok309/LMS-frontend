@@ -1,7 +1,6 @@
 import { auth } from "@/auth"
 export async function POST() {
   const session = await auth();
-  const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
   if (!session?.user?.accessToken) {
     return Response.json({ message: "Not logged in" }, { status: 401 });
@@ -16,7 +15,7 @@ export async function POST() {
     });
 
     const res = await fetch(
-      `${BASE_URL}/api/method/frappe.integrations.oauth2.revoke_token`,
+      `${process.env.BACKEND_URL_INTERNAL}/api/method/frappe.integrations.oauth2.revoke_token`,
       {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
